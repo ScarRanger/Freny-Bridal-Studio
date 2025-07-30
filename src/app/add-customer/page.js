@@ -4,25 +4,30 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { addCustomerRecord } from '@/lib/firebase';
-import { addToGoogleSheets } from '@/lib/googleSheets';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, User, Phone, Scissors, DollarSign, CreditCard, Save, CheckCircle } from 'lucide-react';
 import ClientOnly from '@/components/ClientOnly';
 
 const SERVICES = [
-  'Hair Cut',
-  'Hair Color',
-  'Hair Styling',
-  'Facial',
-  'Threading',
-  'Waxing',
-  'Manicure',
-  'Pedicure',
-  'Bridal Makeup',
-  'Party Makeup',
-  'Hair Treatment',
-  'Spa',
-  'Other'
+  "Eyebrow",
+  "Haircut",
+  "Bleach",
+  "Facial",
+  "Wax",
+  "Pedicure",
+  "Manicure",
+  "Hair spa",
+  "Hair oil massage",
+  "Hydra facial",
+  "Korean Glass facial",
+  "Body massage",
+  "Bridal make up",
+  "Party make up",
+  "Straightening",
+  "Smoothening",
+  "Nano plastic",
+  "Keratin",
+  "Other"
 ];
 
 const PAYMENT_MODES = [
@@ -36,10 +41,12 @@ export default function AddCustomerPage() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    service: '',
     amount: '',
     paymentMode: 'cash'
   });
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [serviceToAdd, setServiceToAdd] = useState('');
+  const [customService, setCustomService] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -69,45 +76,55 @@ export default function AddCustomerPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.service || !formData.amount) {
+    if (!formData.name || selectedServices.length === 0 || !formData.amount) {
       toast.error('Please fill in all required fields');
       return;
     }
-
     setSubmitting(true);
     setSuccess(false);
-
     try {
       // Step 1: Add to Firestore
       toast.loading('Saving to database...', { id: 'firestore' });
-      await addCustomerRecord(formData);
+      const dataToSave = {
+        ...formData,
+        services: selectedServices
+      };
+      await addCustomerRecord(dataToSave);
       toast.success('Saved to database!', { id: 'firestore' });
 
-      // Step 2: Add to Google Sheets
+      // Step 2: Add to Google Sheets via API route
       toast.loading('Logging to Google Sheets...', { id: 'sheets' });
-      await addToGoogleSheets(formData);
-      toast.success('Logged to Google Sheets!', { id: 'sheets' });
+      const response = await fetch('/api/add-customer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSave)
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast.success('Logged to Google Sheets!', { id: 'sheets' });
+      } else {
+        throw new Error(result.error || 'Failed to log to Google Sheets');
+      }
 
       // Success
       setSuccess(true);
       toast.success('Customer record added successfully! 🎉');
-      
+
       // Reset form after a short delay
       setTimeout(() => {
         setFormData({
           name: '',
           phone: '',
-          service: '',
           amount: '',
           paymentMode: 'cash'
         });
+        setSelectedServices([]);
+        setServiceToAdd('');
+        setCustomService('');
         setSuccess(false);
       }, 2000);
-      
     } catch (error) {
       console.error('Error adding customer record:', error);
-      
       if (error.message.includes('sheets')) {
         toast.error('Saved to database but failed to log to Google Sheets. Please check configuration.');
       } else {
@@ -209,7 +226,7 @@ export default function AddCustomerPage() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder="Enter customer name"
                   />
                 </div>
@@ -228,7 +245,7 @@ export default function AddCustomerPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder="Enter phone number"
                   />
                 </div>
@@ -241,26 +258,67 @@ export default function AddCustomerPage() {
                 </label>
                 <div className="relative">
                   <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <select
-                    id="service"
-                    name="service"
-                    required
-                    value={formData.service}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-white"
-                  >
-                    <option value="">Select a service</option>
-                    {SERVICES.map((service) => (
-                      <option key={service} value={service}>
-                        {service}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                  <div className="flex gap-2">
+                    <select
+                      id="service"
+                      name="service"
+                      value={serviceToAdd}
+                      onChange={e => setServiceToAdd(e.target.value)}
+                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-white ${!serviceToAdd ? 'text-gray-500' : 'text-gray-900'}`}
+                    >
+                      <option value="" disabled selected={serviceToAdd === ''} className="text-gray-500">Select a service</option>
+                      {SERVICES.map((service) => (
+                        <option key={service} value={service}>
+                          {service}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="bg-pink-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-600 transition-all"
+                      onClick={() => {
+                        if (serviceToAdd && !selectedServices.includes(serviceToAdd)) {
+                          if (serviceToAdd === 'Other' && customService) {
+                            setSelectedServices(prev => [...prev, customService]);
+                            setCustomService('');
+                          } else if (serviceToAdd !== 'Other') {
+                            setSelectedServices(prev => [...prev, serviceToAdd]);
+                          }
+                          setServiceToAdd('');
+                        }
+                      }}
+                    >
+                      Add Service
+                    </button>
                   </div>
+                  {serviceToAdd === 'Other' && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        value={customService}
+                        onChange={e => setCustomService(e.target.value)}
+                        className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
+                        placeholder="Enter custom service name"
+                      />
+                    </div>
+                  )}
+                  {selectedServices.length > 0 && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Selected Services:</label>
+                      <ul className="list-disc pl-5">
+                        {selectedServices.map((srv, idx) => (
+                          <li key={idx} className="flex justify-between items-center mb-1">
+                            <span>{srv}</span>
+                            <button
+                              type="button"
+                              className="ml-2 text-xs text-red-500 hover:underline"
+                              onClick={() => setSelectedServices(selectedServices.filter((_, i) => i !== idx))}
+                            >Remove</button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -280,7 +338,7 @@ export default function AddCustomerPage() {
                     step="0.01"
                     value={formData.amount}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder="Enter amount"
                   />
                 </div>
@@ -342,4 +400,4 @@ export default function AddCustomerPage() {
       </div>
     </ClientOnly>
   );
-} 
+}

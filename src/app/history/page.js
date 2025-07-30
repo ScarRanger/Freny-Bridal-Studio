@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getCustomerRecords, updateCustomerRecord, deleteCustomerRecord } from '@/lib/firebase';
-import { updateGoogleSheets } from '@/lib/googleSheets';
+// import { updateGoogleSheets } from '@/lib/googleSheets';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, Edit, Trash2, Search, Filter, Calendar, User, Phone, Scissors, DollarSign, CreditCard, Save, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -100,7 +100,7 @@ export default function HistoryPage() {
     setEditForm({
       name: record.name,
       phone: record.phone || '',
-      service: record.service,
+      services: Array.isArray(record.services) ? [...record.services] : record.services ? [record.services] : record.service ? [record.service] : [],
       amount: record.amount,
       paymentMode: record.paymentMode
     });
@@ -108,21 +108,27 @@ export default function HistoryPage() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!editForm.name || !editForm.service || !editForm.amount) {
+    if (!editForm.name || !editForm.services || editForm.services.length === 0 || !editForm.amount) {
       toast.error('Please fill in all required fields');
       return;
     }
-
     try {
-      await updateCustomerRecord(editingRecord.id, editForm);
-      
-      // Update Google Sheets (you might need to implement row tracking)
-      // await updateGoogleSheets(rowIndex, editForm);
-      
+      await updateCustomerRecord(editingRecord.id, {
+        ...editForm,
+        services: editForm.services
+      });
+      // Update Google Sheets
+      await fetch('/api/update-customer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rowIndex: editingRecord.sheetRowIndex, customerData: {
+          ...editForm,
+          services: editForm.services
+        } })
+      });
       toast.success('Record updated successfully!');
       setEditingRecord(null);
-      loadRecords(); // Reload records
+      loadRecords();
     } catch (error) {
       console.error('Error updating record:', error);
       toast.error('Failed to update record');
@@ -133,9 +139,17 @@ export default function HistoryPage() {
     if (!confirm('Are you sure you want to delete this record?')) {
       return;
     }
-
     try {
       await deleteCustomerRecord(recordId);
+      // Delete from Google Sheets
+      const record = records.find(r => r.id === recordId);
+      if (record && record.sheetRowIndex !== undefined) {
+        await fetch('/api/update-customer', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rowIndex: record.sheetRowIndex })
+        });
+      }
       toast.success('Record deleted successfully!');
       loadRecords(); // Reload records
     } catch (error) {
@@ -230,7 +244,7 @@ export default function HistoryPage() {
                   placeholder="Search by name, service, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
                 />
               </div>
 
@@ -240,9 +254,9 @@ export default function HistoryPage() {
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-white"
+                  className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-white ${!selectedMonth ? 'text-gray-500' : 'text-gray-900'}`}
                 >
-                  <option value="">All Months</option>
+                  <option value="" disabled selected={selectedMonth === ''} className="text-gray-500">All Months</option>
                   {getMonthOptions().map(month => (
                     <option key={month} value={month}>
                       {format(parseISO(month + '-01'), 'MMMM yyyy')}
@@ -253,7 +267,7 @@ export default function HistoryPage() {
 
               {/* Record Count */}
               <div className="flex items-center justify-center bg-gray-50 rounded-lg px-4 py-3">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-900">
                   {filteredRecords.length} record{filteredRecords.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -276,67 +290,80 @@ export default function HistoryPage() {
             </div>
           ) : (
             <div className="space-y-8">
-              {Object.entries(groupedRecords).map(([month, monthRecords]) => (
-                <div key={month} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4">
-                    <h2 className="text-xl font-bold text-white">{month}</h2>
-                    <p className="text-pink-100">{monthRecords.length} record{monthRecords.length !== 1 ? 's' : ''}</p>
-                  </div>
-                  <div className="divide-y divide-gray-200">
-                    {monthRecords.map((record) => (
-                      <div key={record.id} className="p-6 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="text-lg font-semibold text-gray-900">{record.name}</h3>
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                record.paymentMode === 'cash' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {record.paymentMode === 'cash' ? 'Cash' : 'UPI'}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
-                              <div className="flex items-center space-x-2">
-                                <Scissors className="h-4 w-4" />
-                                <span>{record.service}</span>
+              {Object.entries(groupedRecords).map(([month, monthRecords]) => {
+                const monthlyTotal = monthRecords.reduce((sum, rec) => sum + (parseFloat(rec.amount) || 0), 0);
+                return (
+                  <div key={month} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 flex items-center justify-between">
+                      <h2 className="text-xl font-bold text-white">{month}</h2>
+                      <span className="text-lg font-semibold text-yellow-200">₹{monthlyTotal.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <p className="text-black px-6 font-semibold">{monthRecords.length} record{monthRecords.length !== 1 ? 's' : ''}</p>
+                    <div className="divide-y divide-gray-200">
+                      {monthRecords.map((record) => (
+                        <div key={record.id} className="p-6 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-2">
+                                <h3 className="text-lg font-semibold text-gray-900">{record.name}</h3>
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  record.paymentMode === 'cash' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                  {record.paymentMode === 'cash' ? 'Cash' : 'UPI'}
+                                </span>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <DollarSign className="h-4 w-4" />
-                                <span>₹{record.amount}</span>
-                              </div>
-                              {record.phone && (
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
                                 <div className="flex items-center space-x-2">
-                                  <Phone className="h-4 w-4" />
-                                  <span>{record.phone}</span>
+                                  <Scissors className="h-4 w-4" />
+                                  <span>Services:</span>
+                                  {Array.isArray(record.services) ? (
+                                    <ul className="list-disc pl-4">
+                                      {record.services.map((srv, idx) => (
+                                        <li key={idx}>{srv}</li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    <span>{record.services || record.service}</span>
+                                  )}
                                 </div>
-                              )}
+                                <div className="flex items-center space-x-2">
+                                  <DollarSign className="h-4 w-4" />
+                                  <span>₹{record.amount}</span>
+                                </div>
+                                {record.phone && (
+                                  <div className="flex items-center space-x-2">
+                                    <Phone className="h-4 w-4" />
+                                    <span>{record.phone}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                                {format(record.createdAt?.toDate ? record.createdAt.toDate() : new Date(record.createdAt), 'PPP p')}
+                              </p>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">
-                              {format(record.createdAt?.toDate ? record.createdAt.toDate() : new Date(record.createdAt), 'PPP p')}
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-2 ml-4">
-                            <button
-                              onClick={() => handleEdit(record)}
-                              className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                            >
-                              <Edit className="h-5 w-5" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(record.id)}
-                              className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                            >
-                              <Trash2 className="h-5 w-5" />
-                            </button>
+                            <div className="flex items-center space-x-2 ml-4">
+                              <button
+                                onClick={() => handleEdit(record)}
+                                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                              >
+                                <Edit className="h-5 w-5" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(record.id)}
+                                className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </main>
@@ -354,7 +381,6 @@ export default function HistoryPage() {
                   <X className="h-6 w-6" />
                 </button>
               </div>
-
               <form onSubmit={handleEditSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -368,7 +394,6 @@ export default function HistoryPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
@@ -380,24 +405,49 @@ export default function HistoryPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Service *
+                    Services *
                   </label>
-                  <select
-                    required
-                    value={editForm.service}
-                    onChange={(e) => setEditForm({...editForm, service: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  >
-                    <option value="">Select a service</option>
-                    {SERVICES.map((service) => (
-                      <option key={service} value={service}>{service}</option>
+                  <div className="space-y-2">
+                    {editForm.services && editForm.services.map((srv, idx) => (
+                      <div key={idx} className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={srv}
+                          onChange={e => {
+                            const newServices = [...editForm.services];
+                            newServices[idx] = e.target.value;
+                            setEditForm({ ...editForm, services: newServices });
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full"
+                        />
+                        <button
+                          type="button"
+                          className="text-xs text-red-500 hover:underline"
+                          onClick={() => {
+                            const newServices = editForm.services.filter((_, i) => i !== idx);
+                            setEditForm({ ...editForm, services: newServices });
+                          }}
+                        >Remove</button>
+                      </div>
                     ))}
-                  </select>
+                    <select
+                      value=""
+                      onChange={e => {
+                        if (e.target.value) {
+                          setEditForm({ ...editForm, services: [...editForm.services, e.target.value] });
+                        }
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full"
+                    >
+                      <option value="">Add a service</option>
+                      {SERVICES.filter(srv => !editForm.services.includes(srv)).map((service) => (
+                        <option key={service} value={service}>{service}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Amount (₹) *
@@ -412,7 +462,6 @@ export default function HistoryPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Payment Mode *
@@ -450,7 +499,6 @@ export default function HistoryPage() {
                     })}
                   </div>
                 </div>
-
                 <div className="flex space-x-3 pt-4">
                   <button
                     type="submit"
@@ -474,4 +522,4 @@ export default function HistoryPage() {
       </div>
     </ClientOnly>
   );
-} 
+}

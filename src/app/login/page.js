@@ -74,14 +74,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Authorized Accounts:</h4>
-            <ul className="text-xs text-blue-700 space-y-1">
-              <li>• admin@frenybridal.com</li>
-              <li>• manager@frenybridal.com</li>
-              <li>• staff@frenybridal.com</li>
-            </ul>
-          </div>
+          
         </div>
       </div>
     </div>

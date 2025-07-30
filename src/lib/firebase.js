@@ -16,12 +16,17 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Pre-specified Google accounts that are allowed to access the system
-const ALLOWED_EMAILS = [
-  'rhine.pereira@gmail.com',
-  'valenciajames0111@gmail.com',
-  'veronicaalmeida249@gmail.com',
-  // Add more allowed emails here
-];
+
+// Fetch allowed emails from Firestore collection 'FBS_allowed_emails'
+export const getAllowedEmails = async () => {
+  try {
+    const snapshot = await getDocs(collection(db, 'FBS_allowed_emails'));
+    return snapshot.docs.map(doc => (doc.data().email || '').trim());
+  } catch (error) {
+    console.error('Error fetching allowed emails:', error);
+    return [];
+  }
+};
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
@@ -32,13 +37,12 @@ export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
-    
-    // Check if the user's email is in the allowed list
-    if (!ALLOWED_EMAILS.includes(user.email)) {
+    // Fetch allowed emails from Firestore
+    const allowedEmails = await getAllowedEmails();
+    if (!allowedEmails.includes(user.email)) {
       await signOut(auth);
       throw new Error('Unauthorized email address. Please contact administrator for access.');
     }
-    
     return result;
   } catch (error) {
     console.error('Google sign-in error:', error);

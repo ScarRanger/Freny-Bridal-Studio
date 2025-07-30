@@ -2,15 +2,37 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Users, History, LogOut, Plus } from 'lucide-react';
 import { signOutUser } from '@/lib/firebase';
 import { toast } from 'react-hot-toast';
 import ClientOnly from '@/components/ClientOnly';
+import { getCustomerRecords } from '@/lib/firebase';
 
 export default function HomePage() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [stats, setStats] = useState({ today: 0, month: 0, total: 0 });
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      (async () => {
+        const records = await getCustomerRecords();
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        const monthStr = new Date().toISOString().slice(0, 7);
+        let today = 0, month = 0, total = 0;
+        records.forEach(rec => {
+          const dateObj = rec.createdAt?.toDate ? rec.createdAt.toDate() : new Date(rec.createdAt);
+          const dateStr = dateObj.toLocaleDateString('en-CA');
+          const monthKey = dateObj.toISOString().slice(0, 7);
+          if (dateStr === todayStr) today++;
+          if (monthKey === monthStr) month++;
+          total += parseFloat(rec.amount) || 0;
+        });
+        setStats({ today, month, total });
+      })();
+    }
+  }, [loading, isAuthenticated, router]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -40,7 +62,7 @@ export default function HomePage() {
     );
   }
 
-  // Don't render anything if not authenticated (will redirect)
+  // Don&apos;t render anything if not authenticated (will redirect)
   if (!isAuthenticated) {
     return null;
   }
@@ -89,7 +111,7 @@ export default function HomePage() {
               Welcome to Freny Bridal Studio
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Manage your beauty parlor operations efficiently with our comprehensive management system
+              Manage your beauty parlor operations efficiently 
             </p>
           </div>
 
@@ -147,8 +169,8 @@ export default function HomePage() {
               <div className="bg-white rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Today's Customers</p>
-                    <p className="text-2xl font-bold text-gray-900">0</p>
+                    <p className="text-sm font-medium text-gray-600">Today&apos;s Customers</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.today}</p>
                   </div>
                   <Users className="h-8 w-8 text-pink-500" />
                 </div>
@@ -157,7 +179,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">This Month</p>
-                    <p className="text-2xl font-bold text-gray-900">0</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.month}</p>
                   </div>
                   <History className="h-8 w-8 text-green-500" />
                 </div>
@@ -166,7 +188,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900">₹0</p>
+                    <p className="text-2xl font-bold text-gray-900">₹{stats.total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
                   </div>
                   <div className="h-8 w-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-bold">₹</span>
