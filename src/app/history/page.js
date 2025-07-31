@@ -72,15 +72,19 @@ export default function HistoryPage() {
   };
 
   const filterRecords = () => {
+
     let filtered = [...records];
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(record =>
-        record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (record.phone && record.phone.includes(searchTerm))
-      );
+      filtered = filtered.filter(record => {
+        const name = record.name ? record.name.toLowerCase() : '';
+        const service = record.service ? record.service.toLowerCase() : '';
+        const phone = record.phone || '';
+        return name.includes(searchTerm.toLowerCase()) ||
+          service.includes(searchTerm.toLowerCase()) ||
+          phone.includes(searchTerm);
+      });
     }
 
     // Filter by month
@@ -199,32 +203,32 @@ export default function HistoryPage() {
 
   return (
     <ClientOnly fallback={
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading...</p>
         </div>
       </div>
     }>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-gray-950 shadow-sm border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-4">
               <button
                 onClick={() => router.push('/')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors mr-4"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors mr-4"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span className="hidden sm:inline">Back</span>
               </button>
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                <div className="h-10 w-10 bg-gradient-to-r from-pink-500 to-purple-700 rounded-full flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Customer History</h1>
-                  <p className="text-sm text-gray-500">View and manage past records</p>
+                  <h1 className="text-xl font-bold text-white">Customer History</h1>
+                  <p className="text-sm text-gray-400">View and manage past records</p>
                 </div>
               </div>
             </div>
@@ -234,29 +238,29 @@ export default function HistoryPage() {
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Filters */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="bg-gray-950 rounded-xl shadow-lg p-6 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
                 <input
                   type="text"
                   placeholder="Search by name, service, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
                 />
               </div>
 
               {/* Month Filter */}
               <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-white ${!selectedMonth ? 'text-gray-500' : 'text-gray-900'}`}
+                  className={`w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-gray-900 ${!selectedMonth ? 'text-gray-400' : 'text-white'}`}
                 >
-                  <option value="" disabled selected={selectedMonth === ''} className="text-gray-500">All Months</option>
+                  <option value="" disabled className="text-gray-400">All Months</option>
                   {getMonthOptions().map(month => (
                     <option key={month} value={month}>
                       {format(parseISO(month + '-01'), 'MMMM yyyy')}
@@ -266,8 +270,8 @@ export default function HistoryPage() {
               </div>
 
               {/* Record Count */}
-              <div className="flex items-center justify-center bg-gray-50 rounded-lg px-4 py-3">
-                <span className="text-sm font-medium text-gray-900">
+              <div className="flex items-center justify-center bg-gray-900 rounded-lg px-4 py-3">
+                <span className="text-sm font-medium text-white">
                   {filteredRecords.length} record{filteredRecords.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -277,44 +281,44 @@ export default function HistoryPage() {
           {/* Records */}
           {loadingRecords ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading records...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto"></div>
+              <p className="mt-4 text-gray-300">Loading records...</p>
             </div>
           ) : filteredRecords.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="text-gray-600 mb-4">
                 <Calendar className="h-16 w-16 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No records found</h3>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
+              <h3 className="text-lg font-medium text-white mb-2">No records found</h3>
+              <p className="text-gray-400">Try adjusting your search or filters</p>
             </div>
           ) : (
             <div className="space-y-8">
               {Object.entries(groupedRecords).map(([month, monthRecords]) => {
                 const monthlyTotal = monthRecords.reduce((sum, rec) => sum + (parseFloat(rec.amount) || 0), 0);
                 return (
-                  <div key={month} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 flex items-center justify-between">
+                  <div key={month} className="bg-gray-950 rounded-xl shadow-lg overflow-hidden">
+                    <div className="bg-gradient-to-r from-pink-500 to-purple-700 px-6 py-4 flex items-center justify-between">
                       <h2 className="text-xl font-bold text-white">{month}</h2>
                       <span className="text-lg font-semibold text-yellow-200">₹{monthlyTotal.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
                     </div>
-                    <p className="text-black px-6 font-semibold">{monthRecords.length} record{monthRecords.length !== 1 ? 's' : ''}</p>
-                    <div className="divide-y divide-gray-200">
+                    <p className="text-white px-6 font-semibold">{monthRecords.length} record{monthRecords.length !== 1 ? 's' : ''}</p>
+                    <div className="divide-y divide-gray-800">
                       {monthRecords.map((record) => (
-                        <div key={record.id} className="p-6 hover:bg-gray-50 transition-colors">
+                        <div key={record.id} className="p-6 hover:bg-gray-900 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
-                                <h3 className="text-lg font-semibold text-gray-900">{record.name}</h3>
+                                <h3 className="text-lg font-semibold text-white">{record.name}</h3>
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                                   record.paymentMode === 'cash' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-blue-100 text-blue-800'
+                                    ? 'bg-green-900 text-green-200' 
+                                    : 'bg-blue-900 text-blue-200'
                                 }`}>
                                   {record.paymentMode === 'cash' ? 'Cash' : 'UPI'}
                                 </span>
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-300">
                                 <div className="flex items-center space-x-2">
                                   <Scissors className="h-4 w-4" />
                                   <span>Services:</span>
@@ -346,13 +350,13 @@ export default function HistoryPage() {
                             <div className="flex items-center space-x-2 ml-4">
                               <button
                                 onClick={() => handleEdit(record)}
-                                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                                className="p-2 text-gray-500 hover:text-blue-400 transition-colors"
                               >
                                 <Edit className="h-5 w-5" />
                               </button>
                               <button
                                 onClick={() => handleDelete(record.id)}
-                                className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                                className="p-2 text-gray-500 hover:text-red-400 transition-colors"
                               >
                                 <Trash2 className="h-5 w-5" />
                               </button>
@@ -370,20 +374,20 @@ export default function HistoryPage() {
 
         {/* Edit Modal */}
         {editingRecord && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Edit Record</h2>
+                <h2 className="text-xl font-bold text-white">Edit Record</h2>
                 <button
                   onClick={() => setEditingRecord(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-500 hover:text-gray-300"
                 >
                   <X className="h-6 w-6" />
                 </button>
               </div>
               <form onSubmit={handleEditSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Customer Name *
                   </label>
                   <input
@@ -391,22 +395,24 @@ export default function HistoryPage() {
                     required
                     value={editForm.name}
                     onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400 placeholder:opacity-100 bg-gray-900 text-white text-lg font-bold"
+                    placeholder="Enter customer name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={editForm.phone}
                     onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400 placeholder:opacity-100 bg-gray-900 text-white"
+                    placeholder="Enter phone number"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Services *
                   </label>
                   <div className="space-y-2">
@@ -420,11 +426,12 @@ export default function HistoryPage() {
                             newServices[idx] = e.target.value;
                             setEditForm({ ...editForm, services: newServices });
                           }}
-                          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full"
+                          className="px-3 py-2 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full placeholder:text-gray-400 placeholder:opacity-100 bg-gray-900 text-white"
+                          placeholder="Enter service name"
                         />
                         <button
                           type="button"
-                          className="text-xs text-red-500 hover:underline"
+                          className="text-xs text-red-400 hover:underline"
                           onClick={() => {
                             const newServices = editForm.services.filter((_, i) => i !== idx);
                             setEditForm({ ...editForm, services: newServices });
@@ -439,7 +446,7 @@ export default function HistoryPage() {
                           setEditForm({ ...editForm, services: [...editForm.services, e.target.value] });
                         }
                       }}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full"
+                      className="px-3 py-2 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full bg-gray-900 text-white"
                     >
                       <option value="">Add a service</option>
                       {SERVICES.filter(srv => !editForm.services.includes(srv)).map((service) => (
@@ -449,7 +456,7 @@ export default function HistoryPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Amount (₹) *
                   </label>
                   <input
@@ -459,11 +466,12 @@ export default function HistoryPage() {
                     step="0.01"
                     value={editForm.amount}
                     onChange={(e) => setEditForm({...editForm, amount: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400 placeholder:opacity-100 bg-gray-900 text-white font-bold text-xl"
+                    placeholder="Enter amount"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Payment Mode *
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -474,8 +482,8 @@ export default function HistoryPage() {
                           key={mode.id}
                           className={`relative flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
                             editForm.paymentMode === mode.id
-                              ? 'border-pink-500 bg-pink-50'
-                              : 'border-gray-300 hover:border-gray-400'
+                              ? 'border-pink-500 bg-pink-900'
+                              : 'border-gray-800 hover:border-gray-600 bg-gray-900'
                           }`}
                         >
                           <input
@@ -487,10 +495,10 @@ export default function HistoryPage() {
                             className="sr-only"
                           />
                           <Icon className={`h-4 w-4 mr-2 ${
-                            editForm.paymentMode === mode.id ? 'text-pink-500' : 'text-gray-400'
+                            editForm.paymentMode === mode.id ? 'text-pink-400' : 'text-gray-500'
                           }`} />
                           <span className={`text-sm font-medium ${
-                            editForm.paymentMode === mode.id ? 'text-pink-700' : 'text-gray-700'
+                            editForm.paymentMode === mode.id ? 'text-pink-200' : 'text-gray-300'
                           }`}>
                             {mode.label}
                           </span>
@@ -502,7 +510,7 @@ export default function HistoryPage() {
                 <div className="flex space-x-3 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2"
+                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-700 text-white py-2 px-4 rounded-lg font-medium hover:from-pink-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2"
                   >
                     <Save className="h-4 w-4" />
                     <span>Save Changes</span>
@@ -510,7 +518,7 @@ export default function HistoryPage() {
                   <button
                     type="button"
                     onClick={() => setEditingRecord(null)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+                    className="flex-1 bg-gray-800 text-gray-300 py-2 px-4 rounded-lg font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
                   >
                     Cancel
                   </button>

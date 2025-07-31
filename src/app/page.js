@@ -53,10 +53,10 @@ export default function HomePage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+            <p className="mt-4 text-gray-300">Loading...</p>
         </div>
       </div>
     );
@@ -69,16 +69,16 @@ export default function HomePage() {
 
   return (
     <ClientOnly fallback={
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-300">Loading...</p>
         </div>
       </div>
     }>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-gray-950 shadow-sm border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center space-x-3">
@@ -86,15 +86,15 @@ export default function HomePage() {
                   <span className="text-white font-bold text-lg">F</span>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Freny Bridal Studio</h1>
+                  <h1 className="text-xl font-bold text-white">Freny Bridal Studio</h1>
                   <p className="text-sm text-gray-500">Beauty Parlor Management</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+                <span className="text-sm text-pink-200">Welcome, {user?.email}</span>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center space-x-2 bg-gray-900 border border-pink-500 text-pink-400 hover:bg-gray-800 hover:text-pink-300 transition-colors rounded-lg px-4 py-2 font-semibold shadow"
                 >
                   <LogOut className="h-5 w-5" />
                   <span className="hidden sm:inline">Logout</span>
@@ -107,10 +107,10 @@ export default function HomePage() {
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-white mb-4">
               Welcome to Freny Bridal Studio
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               Manage your beauty parlor operations efficiently 
             </p>
           </div>
@@ -118,15 +118,15 @@ export default function HomePage() {
           {/* Navigation Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Add Customer Card */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
               <div className="text-center">
                 <div className="mx-auto h-16 w-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
                   <Plus className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="text-2xl font-bold text-white mb-4">
                   Add New Customer
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-300 mb-6">
                   Record customer details, services provided, and payment information
                 </p>
                 <button
@@ -139,15 +139,15 @@ export default function HomePage() {
             </div>
 
             {/* View History Card */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
               <div className="text-center">
                 <div className="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-6">
                   <History className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="text-2xl font-bold text-white mb-4">
                   View History
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-300 mb-6">
                   Browse past customer records, edit entries, and manage your data
                 </p>
                 <button
@@ -162,33 +162,33 @@ export default function HomePage() {
 
           {/* Quick Stats */}
           <div className="mt-16 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">
               Quick Overview
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Today&apos;s Customers</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.today}</p>
+                    <p className="text-sm font-medium text-gray-300">Today&apos;s Customers</p>
+                    <p className="text-2xl font-bold text-white">{stats.today}</p>
                   </div>
                   <Users className="h-8 w-8 text-pink-500" />
                 </div>
               </div>
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">This Month</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.month}</p>
+                    <p className="text-sm font-medium text-gray-300">This Month</p>
+                    <p className="text-2xl font-bold text-white">{stats.month}</p>
                   </div>
                   <History className="h-8 w-8 text-green-500" />
                 </div>
               </div>
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900">₹{stats.total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-medium text-gray-300">Total Revenue</p>
+                    <p className="text-2xl font-bold text-white">₹{stats.total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
                   </div>
                   <div className="h-8 w-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-bold">₹</span>

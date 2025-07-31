@@ -52,10 +52,10 @@ export default function AddCustomerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading...</p>
         </div>
       </div>
     );
@@ -137,27 +137,27 @@ export default function AddCustomerPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+        <div className="bg-gray-950 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <div className="mx-auto h-16 w-16 bg-green-900 rounded-full flex items-center justify-center mb-6">
+            <CheckCircle className="h-8 w-8 text-green-300" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             Success!
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-300 mb-6">
             Customer record has been saved to both database and Google Sheets.
           </p>
           <div className="space-y-3">
             <button
               onClick={() => setSuccess(false)}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200"
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200"
             >
               Add Another Customer
             </button>
             <button
               onClick={() => router.push('/')}
-              className="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+              className="w-full bg-gray-800 text-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
             >
               Back to Dashboard
             </button>
@@ -169,21 +169,21 @@ export default function AddCustomerPage() {
 
   return (
     <ClientOnly fallback={
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading...</p>
         </div>
       </div>
     }>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-gray-950 shadow-sm border-b border-gray-800">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-4">
               <button
                 onClick={() => router.push('/')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors mr-4"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors mr-4"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span className="hidden sm:inline">Back</span>
@@ -193,8 +193,8 @@ export default function AddCustomerPage() {
                   <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Add New Customer</h1>
-                  <p className="text-sm text-gray-500">Record customer details and services</p>
+                  <h1 className="text-xl font-bold text-white">Add New Customer</h1>
+                  <p className="text-sm text-gray-400">Record customer details and services</p>
                 </div>
               </div>
             </div>
@@ -203,10 +203,10 @@ export default function AddCustomerPage() {
 
         {/* Main Content */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">Data Storage</h3>
-              <p className="text-xs text-blue-700">
+          <div className="bg-gray-950 rounded-2xl shadow-xl p-8">
+            <div className="mb-6 p-4 bg-blue-900 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-200 mb-2">Data Storage</h3>
+              <p className="text-xs text-blue-300">
                 Customer records will be automatically saved to both Firebase database and Google Sheets for backup and reporting.
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function AddCustomerPage() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
                     placeholder="Enter customer name"
                   />
                 </div>
@@ -245,7 +245,7 @@ export default function AddCustomerPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
                     placeholder="Enter phone number"
                   />
                 </div>
@@ -257,14 +257,14 @@ export default function AddCustomerPage() {
                   Service Provided *
                 </label>
                 <div className="relative">
-                  <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Scissors className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" style={{top: '50%', transform: 'translateY(-50%)'}} />
                   <div className="flex gap-2">
                     <select
                       id="service"
                       name="service"
                       value={serviceToAdd}
                       onChange={e => setServiceToAdd(e.target.value)}
-                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-white ${!serviceToAdd ? 'text-gray-500' : 'text-gray-900'}`}
+                      className={`w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-gray-900 ${!serviceToAdd ? 'text-gray-400' : 'text-white'}`}
                     >
                       <option value="" disabled selected={serviceToAdd === ''} className="text-gray-500">Select a service</option>
                       {SERVICES.map((service) => (
@@ -297,21 +297,24 @@ export default function AddCustomerPage() {
                         type="text"
                         value={customService}
                         onChange={e => setCustomService(e.target.value)}
-                        className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
+                        className="w-full py-3 px-4 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
                         placeholder="Enter custom service name"
                       />
                     </div>
                   )}
                   {selectedServices.length > 0 && (
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Selected Services:</label>
-                      <ul className="list-disc pl-5">
+                      <div className="flex items-center mb-2">
+                        <Scissors className="h-4 w-4 text-gray-300 mr-2" />
+                        <label className="block text-sm font-medium text-gray-300">Selected Services:</label>
+                      </div>
+                      <ul className="list-disc pl-7">
                         {selectedServices.map((srv, idx) => (
                           <li key={idx} className="flex justify-between items-center mb-1">
                             <span>{srv}</span>
                             <button
                               type="button"
-                              className="ml-2 text-xs text-red-500 hover:underline"
+                              className="ml-2 text-xs text-red-400 hover:underline"
                               onClick={() => setSelectedServices(selectedServices.filter((_, i) => i !== idx))}
                             >Remove</button>
                           </li>
@@ -338,7 +341,7 @@ export default function AddCustomerPage() {
                     step="0.01"
                     value={formData.amount}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors placeholder:text-gray-500 placeholder:opacity-100"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100 text-base font-medium"
                     placeholder="Enter amount"
                   />
                 </div>
@@ -357,8 +360,8 @@ export default function AddCustomerPage() {
                         key={mode.id}
                         className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
                           formData.paymentMode === mode.id
-                            ? 'border-pink-500 bg-pink-50'
-                            : 'border-gray-300 hover:border-gray-400'
+                            ? 'border-pink-500 bg-pink-900'
+                            : 'border-gray-800 hover:border-gray-600 bg-gray-900'
                         }`}
                       >
                         <input
@@ -373,7 +376,7 @@ export default function AddCustomerPage() {
                           formData.paymentMode === mode.id ? 'text-pink-500' : 'text-gray-400'
                         }`} />
                         <span className={`font-medium ${
-                          formData.paymentMode === mode.id ? 'text-pink-700' : 'text-gray-700'
+                          formData.paymentMode === mode.id ? 'text-pink-200' : 'text-gray-300'
                         }`}>
                           {mode.label}
                         </span>
@@ -388,7 +391,7 @@ export default function AddCustomerPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <Save className="h-5 w-5" />
                   <span>{submitting ? 'Saving...' : 'Save Customer Record'}</span>
