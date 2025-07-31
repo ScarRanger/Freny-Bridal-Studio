@@ -44,19 +44,28 @@ export const addToGoogleSheets = async (customerData) => {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
-    // Prepare row data
+    // Prepare row data with proper IST date and time
     const services = Array.isArray(customerData.services)
       ? customerData.services.join(', ')
       : (customerData.service || '');
+
+    // Get current time in IST (UTC+5:30) regardless of server timezone
+    const now = new Date();
+    // Convert to IST by adding 5 hours 30 minutes to UTC
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istTime = new Date(utc + (5.5 * 60 * 60000));
+    const dateStr = istTime.toLocaleDateString('en-IN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const timeStr = istTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
     const row = [
-      new Date().toLocaleDateString('en-IN'),
-      new Date().toLocaleTimeString('en-IN'),
+      dateStr,
+      timeStr,
       customerData.name,
       customerData.phone || 'N/A',
       services,
       customerData.amount,
       customerData.paymentMode,
-      new Date().toISOString()
+      istTime.toISOString()
     ];
 
     // Append row to the sheet
