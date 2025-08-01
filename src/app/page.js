@@ -116,7 +116,7 @@ export default function HomePage() {
           </div>
 
           {/* Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Add Customer Card */}
             <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
               <div className="text-center">
@@ -155,6 +155,28 @@ export default function HomePage() {
                   className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200"
                 >
                   View History
+                </button>
+              </div>
+            </div>
+
+            {/* Manage Bookings Card */}
+            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="text-center">
+                <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mb-6">
+                  {/* You can use a calendar or book icon here if you add one, or just a Plus for now */}
+                  <Plus className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Manage Bookings
+                </h3>
+                <p className="text-gray-300 mb-6">
+                  Add and manage upcoming bookings for your customers
+                </p>
+                <button
+                  onClick={() => router.push('/manage-bookings')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                  Manage Bookings
                 </button>
               </div>
             </div>

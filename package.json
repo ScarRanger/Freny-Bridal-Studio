@@ -12,6 +12,7 @@
     "@hookform/resolvers": "^3.9.1",
     "date-fns": "^4.1.0",
     "firebase": "^12.0.0",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "^12.23.11",
     "google-spreadsheet": "^4.1.5",
     "googleapis": "^154.1.0",

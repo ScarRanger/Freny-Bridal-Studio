@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "freny-bridal-studio-ffd05",
+  "private_key_id": "a76853b9c418affaccfcc2d06b166619a3aa91cf",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDD4rgxqpsggRmq\nBIxFTcUp8n72kQnZHNfeLPvElBK6iWlHlUNyRsBYzMyeRTFVZfI8yXG1JzKAalCm\n99H2puB28ID/quWVjYVJJg/GBEf1xrodoUGJs4SvJD1qbrQ0WXWxyT16jY/Xv/5v\nqvtxISLC/XQHDkqtS3dCid1BdRTYvzhYYETPP9DecXu1AsV45q0U7w8BtOsKKga8\n6kaAce7nPNMAsNSXdXprn1XcOomcckESuNyPPWGuQ5aiuZymTseAAz6zxYu9lmjs\nXFzKe/ojMQMoCwWFxPyNmaFng+AAsyNudL7EwegY+PmMFRbWUjl9bTZoIU7DXERT\npaQUbLGhAgMBAAECggEACnQrg08JB1OMdJPYjoxHdOUhnHQCFAmjhZJd/1AtrbHO\nogjXuB4JftOzKdEkgFu38UGI5XOJkOvbkQWRuXmPahmMsNhEd1Y9ojk7R0SMOJQZ\n86Ha9wfTEWu8MVVmHZMWol3Mf6FVZ1yyLfBwicmMat6O1h+Poa7w1ua3nZoreiOm\nU56ij+QzV+6TJz70q3an6cEWT4XPxn+8RxqysF4lG3+DopX7c7mvqOG7Vt7etTI6\nPMy0m3EG7HPPyAZ8LPCcKGfh3sQARFsVfSsVRXht5VVOvXnWjDpANKmlbGiNz6ts\nNmSVRW64MSJNX9pTIQle2DI2YXviJfCx+UF0pNpIyQKBgQD1ofj8I/Aao6N72axx\n8JLXeoCgFpQUJxkUjDgt9GRFf9jQjoXdOdLDSxGK1V0QGBKIzhsuW1/zZFCMGmgm\n6RGcDkL+qk3R4R79kAnVEIu5g8A2t7sLrM7fiWqX5jnfw/9siwR4Mjuw7Py49BMs\niE+KCjOHQMTs2rRzwYLxbOO5fQKBgQDMJzyPqqImIqgBQrelOWY3JHDYDiSpC0k/\n3Ktgh5nCUPvqk7gezYEXMNkFgJLF9u3VQFaUBkqJvRFvxfcyE2fDGn/a1XjSUaBP\naxDg6SJ5Xc5o6L/Q//PZY+8O6t/s0vRatnBDfzzwJYtr4Jo8VH0AzTbvCerGIDjb\ncaRe0sxx9QKBgQDkCxhJnmPPl5Sz6wb6UUtC2eyIs+2OOC5EsVmG8JoXG/aCyY7m\nMETIIu2KY0QfKPosII2DoDmYkc1mBS4k0cUTiPoRzLKq48INzqgSM2ZFOVg+dJ0m\n3azCQ6W+mHOqlyCP+RCRNrHMNHj8jT0v3u1ZTtc//pXU/8cAoOuckGdrUQKBgQCb\nlgOHkglFewADBe+jkd0ehT0iy5SQ6DMI4ooRZQZ/muyCV9XoU8HgBLBAiz5QdOHI\nteHFqg3Ab0EMqBi+Jx/bByUNh8cuslq0a+pPHh3R1PXr6gXVqFsVAB4+hi3l9NeZ\nEpT4O84bTuG0c1XYSKODquIExtAP8pqiUzdrtMduyQKBgQDDGKf0fFpkfYGq2fb7\nB5Ep3J8obExH6bOcBSoi754JtKktNoqP2EfCIftIJuVEaHYwbvoa9tvTz7hEb6bb\nrEnBdVVOr0Ot9U1BweTyxPTv+YeRzrX4seSVQnqHmtSN1mzisG3YRNTHIphxsdKj\nxZJVDbXic67F+bcKruPkgKrGlw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@freny-bridal-studio-ffd05.iam.gserviceaccount.com",
+  "client_id": "100348738105438733947",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40freny-bridal-studio-ffd05.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

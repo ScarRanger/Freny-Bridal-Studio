@@ -1,3 +1,46 @@
+// Add a booking to Google Sheets (Bookings sheet)
+// import { google } from 'googleapis';
+export const addBookingToGoogleSheets = async (bookingData) => {
+  try {
+    // Decode base64 credentials
+    const serviceAccountJson = JSON.parse(
+      Buffer.from(GOOGLE_SHEETS_CONFIG.credentials, 'base64').toString('utf8')
+    );
+    const auth = new google.auth.GoogleAuth({
+      credentials: serviceAccountJson,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const sheets = google.sheets({ version: 'v4', auth });
+    // Get current time in IST (UTC+5:30)
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istTime = new Date(utc + (5.5 * 60 * 60000));
+    const dateStr = istTime.toLocaleDateString('en-IN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const timeStr = istTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    const row = [
+      dateStr,
+      timeStr,
+      bookingData.name,
+      bookingData.number || '',
+      bookingData.service,
+      bookingData.notes || '',
+      istTime.toISOString()
+    ];
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+      range: `Bookings!A1`,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: {
+        values: [row],
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error('Error adding booking to Google Sheets:', error);
+    throw new Error('sheets: ' + error.message);
+  }
+};
 export const deleteFromGoogleSheets = async (rowIndex) => {
   try {
     const serviceAccountJson = JSON.parse(

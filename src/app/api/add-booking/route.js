@@ -1,18 +1,19 @@
-import { addToGoogleSheets } from '@/lib/googleSheets';
+
+import { addBookingToGoogleSheets } from '@/lib/googleSheets';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 export async function POST(request) {
   try {
-    const customerData = await request.json();
-    // Save to Firestore 'customers' collection using Admin SDK
-    await adminDb.collection('customers').add({
-      ...customerData,
+    const bookingData = await request.json();
+    // Save to Firestore 'bookings' collection using Admin SDK
+    await adminDb.collection('bookings').add({
+      ...bookingData,
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: customerData.createdBy || 'system',
+      createdBy: bookingData.createdBy || 'system',
     });
     // Save to Google Sheets
-    await addToGoogleSheets(customerData);
+    await addBookingToGoogleSheets(bookingData);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

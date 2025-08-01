@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { addCustomerRecord } from '@/lib/firebase';
+// import { addCustomerRecord } from '@/lib/firebase';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, User, Phone, Scissors, DollarSign, CreditCard, Save, CheckCircle } from 'lucide-react';
 import ClientOnly from '@/components/ClientOnly';
@@ -83,17 +83,13 @@ export default function AddCustomerPage() {
     setSubmitting(true);
     setSuccess(false);
     try {
-      // Step 1: Add to Firestore
-      toast.loading('Saving to database...', { id: 'firestore' });
+
+      // Save to Firestore and Google Sheets via API route
+      toast.loading('Saving to database and Google Sheets...', { id: 'saving' });
       const dataToSave = {
         ...formData,
         services: selectedServices
       };
-      await addCustomerRecord(dataToSave);
-      toast.success('Saved to database!', { id: 'firestore' });
-
-      // Step 2: Add to Google Sheets via API route
-      toast.loading('Logging to Google Sheets...', { id: 'sheets' });
       const response = await fetch('/api/add-customer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,9 +97,9 @@ export default function AddCustomerPage() {
       });
       const result = await response.json();
       if (result.success) {
-        toast.success('Logged to Google Sheets!', { id: 'sheets' });
+        toast.success('Saved to database and Google Sheets!', { id: 'saving' });
       } else {
-        throw new Error(result.error || 'Failed to log to Google Sheets');
+        throw new Error(result.error || 'Failed to save');
       }
 
       // Success
