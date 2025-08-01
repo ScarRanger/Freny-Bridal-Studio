@@ -3,21 +3,6 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from 'firebase/firestore';
 
-// Add a booking to Firestore 'bookings' collection
-export const addBookingRecord = async (data) => {
-  try {
-    const docRef = await addDoc(collection(db, 'bookings'), {
-      ...data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: auth.currentUser?.email || 'unknown',
-    });
-    return docRef;
-  } catch (error) {
-    console.error('Error adding booking record:', error);
-    throw error;
-  }
-};
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

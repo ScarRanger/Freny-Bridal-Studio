@@ -1,3 +1,51 @@
+// Delete a row from Google Sheets by rowIndex (0-based, not including header)
+export const deleteFromGoogleSheets = async (rowIndex) => {
+  try {
+    const serviceAccountJson = JSON.parse(
+      Buffer.from(GOOGLE_SHEETS_CONFIG.credentials, 'base64').toString('utf8')
+    );
+    const auth = new google.auth.GoogleAuth({
+      credentials: serviceAccountJson,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    // Get sheetId by name
+    const meta = await sheets.spreadsheets.get({
+      spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+    });
+    const sheet = meta.data.sheets.find(
+      s => s.properties.title === GOOGLE_SHEETS_CONFIG.sheetName
+    );
+    if (!sheet) throw new Error('Sheet not found');
+    const sheetId = sheet.properties.sheetId;
+
+    // Adjust row index for Sheets API (0-based, including header row)
+    const adjustedRowIndex = rowIndex + (GOOGLE_SHEETS_CONFIG.startRow - 1); // 1-based for API
+
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+      requestBody: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId,
+                dimension: 'ROWS',
+                startIndex: adjustedRowIndex,
+                endIndex: adjustedRowIndex + 1,
+              },
+            },
+          },
+        ],
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error('Error deleting from Google Sheets:', error);
+    throw new Error('sheets: ' + error.message);
+  }
+};
 // Add a booking to Google Sheets (Bookings sheet)
 // import { google } from 'googleapis';
 export const addBookingToGoogleSheets = async (bookingData) => {
@@ -38,29 +86,6 @@ export const addBookingToGoogleSheets = async (bookingData) => {
     return true;
   } catch (error) {
     console.error('Error adding booking to Google Sheets:', error);
-    throw new Error('sheets: ' + error.message);
-  }
-};
-export const deleteFromGoogleSheets = async (rowIndex) => {
-  try {
-    const serviceAccountJson = JSON.parse(
-      Buffer.from(GOOGLE_SHEETS_CONFIG.credentials, 'base64').toString('utf8')
-    );
-    const doc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.spreadsheetId);
-    await doc.useServiceAccountAuth(serviceAccountJson);
-    await doc.loadInfo();
-    let sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.sheetName];
-    if (!sheet) {
-      sheet = doc.sheetsByIndex[0];
-    }
-    const rows = await sheet.getRows();
-    const adjustedRowIndex = rowIndex + (GOOGLE_SHEETS_CONFIG.startRow - 2);
-    if (rows[adjustedRowIndex]) {
-      await rows[adjustedRowIndex].delete();
-    }
-    return true;
-  } catch (error) {
-    console.error('Error deleting from Google Sheets:', error);
     throw new Error('sheets: ' + error.message);
   }
 };
@@ -135,42 +160,45 @@ export const updateGoogleSheets = async (rowIndex, customerData) => {
     const serviceAccountJson = JSON.parse(
       Buffer.from(GOOGLE_SHEETS_CONFIG.credentials, 'base64').toString('utf8')
     );
+    const auth = new google.auth.GoogleAuth({
+      credentials: serviceAccountJson,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const sheets = google.sheets({ version: 'v4', auth });
 
-    const doc = new GoogleSpreadsheet(GOOGLE_SHEETS_CONFIG.spreadsheetId);
-    
-    // Use service account credentials
-    await doc.useServiceAccountAuth(serviceAccountJson);
-    await doc.loadInfo();
+    // Prepare row data
+    const services = Array.isArray(customerData.services)
+      ? customerData.services.join(', ')
+      : (customerData.service || '');
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istTime = new Date(utc + (5.5 * 60 * 60000));
+    const dateStr = istTime.toLocaleDateString('en-IN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const timeStr = istTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-    // Get the specified sheet by name, or use the first sheet as fallback
-    let sheet;
-    try {
-      sheet = doc.sheetsByTitle[GOOGLE_SHEETS_CONFIG.sheetName];
-      if (!sheet) {
-        sheet = doc.sheetsByIndex[0];
-        console.warn(`Sheet "${GOOGLE_SHEETS_CONFIG.sheetName}" not found, using first sheet: "${sheet.title}"`);
-      }
-    } catch (error) {
-      sheet = doc.sheetsByIndex[0];
-      console.warn('Using first sheet as fallback');
-    }
+    const row = [
+      dateStr,
+      timeStr,
+      customerData.name,
+      customerData.phone || 'N/A',
+      services,
+      customerData.amount,
+      customerData.paymentMode,
+      istTime.toISOString()
+    ];
 
-    const rows = await sheet.getRows();
-    
-    // Adjust row index based on start row configuration
-    const adjustedRowIndex = rowIndex + (GOOGLE_SHEETS_CONFIG.startRow - 2);
-    
-    if (rows[adjustedRowIndex]) {
-      rows[adjustedRowIndex]['Customer Name'] = customerData.name;
-      rows[adjustedRowIndex]['Phone Number'] = customerData.phone || 'N/A';
-      rows[adjustedRowIndex]['Service'] = customerData.service;
-      rows[adjustedRowIndex]['Amount'] = customerData.amount;
-      rows[adjustedRowIndex]['Payment Mode'] = customerData.paymentMode;
-      rows[adjustedRowIndex]['Updated At'] = new Date().toISOString();
-      
-      await rows[adjustedRowIndex].save();
-    }
+    // Adjust row index for Sheets API (0-based, including header row)
+    const adjustedRowIndex = rowIndex + (GOOGLE_SHEETS_CONFIG.startRow - 1); // 1-based for API
+    const range = `${GOOGLE_SHEETS_CONFIG.sheetName}!A${adjustedRowIndex + 1}:H${adjustedRowIndex + 1}`;
 
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+      range,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [row],
+      },
+    });
     return true;
   } catch (error) {
     console.error('Error updating Google Sheets:', error);
