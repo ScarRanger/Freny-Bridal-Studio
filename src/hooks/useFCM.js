@@ -4,12 +4,22 @@ import { app } from '@/lib/firebase';
 
 export const useFCM = () => {
   const [token, setToken] = useState(null);
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState(
+    typeof window !== 'undefined' && 'Notification' in window 
+      ? Notification.permission 
+      : 'default'
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const requestPermission = async () => {
       try {
+        // Only run in browser
+        if (typeof window === 'undefined' || !('Notification' in window)) {
+          setLoading(false);
+          return;
+        }
+
         // Register service worker first
         if ('serviceWorker' in navigator) {
           await navigator.serviceWorker.register('/firebase-messaging-sw.js');
@@ -44,7 +54,7 @@ export const useFCM = () => {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && permission === 'granted') {
+    if (typeof window !== 'undefined' && 'Notification' in window && permission === 'granted') {
       const messaging = getMessaging(app);
       
       // Listen for foreground messages

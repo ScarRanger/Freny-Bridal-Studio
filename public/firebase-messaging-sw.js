@@ -3,6 +3,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
 // Initialize Firebase with your config
+// Note: These are public keys safe for client-side use
 firebase.initializeApp({
   apiKey: "AIzaSyAAtPnSogEvJbxqPg7r1P1nbj6DWIn3zyU",
   authDomain: "freny-bridal-studio-ffd05.firebaseapp.com",
