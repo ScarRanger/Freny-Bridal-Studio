@@ -14,6 +14,8 @@ const SERVICES = [
   "Bleach",
   "Facial",
   "Wax",
+  "Forehead",
+  "Upper lip",
   "Pedicure",
   "Manicure",
   "Hair spa",

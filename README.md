@@ -5,11 +5,16 @@ A comprehensive web application for managing beauty parlor operations, built wit
 ## Features
 
 - 🔐 **Google Authentication** - Secure sign-in with pre-specified Google accounts
-- 👥 **Customer Management** - Add new customer records with services and payments
+- 👥 **Customer Management** - Add, edit, and delete customer records with services and payments
+- 📅 **Interactive Calendar Bookings**  
+  - Month view calendar with clickable days  
+  - Colored dot indicator for days with bookings  
+  - Click any day to view, add, edit, or delete bookings for that day in a modal dialog  
+  - All booking changes sync to both Firestore and Google Sheets
 - 📊 **Dual Data Storage** - Firebase Firestore + Google Sheets for backup and reporting
 - 📱 **Responsive Design** - Works perfectly on desktop and mobile devices
 - 🔍 **History & Search** - View, edit, and delete past records
-- 📅 **Monthly Organization** - Records sorted by month for easy management
+- 📆 **Monthly Organization** - Records sorted by month for easy management
 
 ## Tech Stack
 
@@ -130,6 +135,15 @@ GOOGLE_SHEETS_START_ROW=3
 - Only pre-specified email addresses can access the system
 - Authentication is persistent across sessions
 
+### Manage Bookings (Calendar)
+- View a monthly calendar with all bookings
+- Days with bookings show a colored dot indicator
+- Click any day to open a modal dialog:
+  - See all bookings for that day
+  - Add a new booking for that day
+  - Edit or delete existing bookings
+- All changes are instantly synced to Firestore and Google Sheets
+
 ### Add Customer
 - Navigate to "Add New Customer"
 - Fill in customer details:
@@ -138,7 +152,7 @@ GOOGLE_SHEETS_START_ROW=3
   - Service provided (required)
   - Amount (required)
   - Payment mode: Cash or UPI
-- Data is automatically saved to **both** Firebase and Google Sheets
+- Data is automatically saved to **both** Firebase Firestore and Google Sheets
 - Real-time progress indicators show saving status
 
 ### View History
@@ -153,11 +167,11 @@ GOOGLE_SHEETS_START_ROW=3
 ### Dual Logging System
 - **Firebase Firestore**: Primary database for real-time data
 - **Google Sheets**: Backup and reporting system
-- All customer records are automatically logged to both systems
+- All customer and booking records are automatically logged to both systems
 - Progress indicators show saving status for each system
 
 ### Data Flow
-1. User submits customer form
+1. User submits customer or booking form
 2. Data saved to Firebase Firestore
 3. Data logged to Google Sheets
 4. Success confirmation shown to user
@@ -187,7 +201,7 @@ Make sure to add all environment variables in your Vercel project settings.
 
 - Touch-friendly interface
 - Responsive design for all screen sizes
-- Optimized for iOS devices
+- Optimized for iOS and Android devices
 - Fast loading and smooth interactions
 
 ## Support
@@ -196,4 +210,4 @@ For technical support or questions, please contact the development team.
 
 ## License
 
-This project is proprietary software for Freny Bridal Studio.
+This project is proprietary software for Freny

@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { Toaster } from 'react-hot-toast'
+import FCMProvider from '@/components/FCMProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,17 +17,19 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className} suppressHydrationWarning={true}>
         <AuthProvider>
-          {children}
-          <Toaster 
-            position="top-center"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-              },
-            }}
-          />
+          <FCMProvider>
+            {children}
+            <Toaster 
+              position="top-center"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+              }}
+            />
+          </FCMProvider>
         </AuthProvider>
       </body>
     </html>

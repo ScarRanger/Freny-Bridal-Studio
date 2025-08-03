@@ -28,6 +28,8 @@ export default function ManageBookingsPage() {
     const [calendarMonth, setCalendarMonth] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState(null);
     const [dayBookings, setDayBookings] = useState([]);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
     const router = useRouter();
 
     // Group bookings by date (YYYY-MM-DD)
@@ -37,6 +39,33 @@ export default function ManageBookingsPage() {
         if (!bookingsByDate[dateKey]) bookingsByDate[dateKey] = [];
         bookingsByDate[dateKey].push(b);
     });
+
+    // Swipe handling functions
+    const handleTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            // Swipe left - next month
+            setCalendarMonth(addMonths(calendarMonth, 1));
+        }
+        if (isRightSwipe) {
+            // Swipe right - previous month
+            setCalendarMonth(subMonths(calendarMonth, 1));
+        }
+    };
 
     // Calendar helpers
     const renderCalendar = () => {
@@ -222,11 +251,28 @@ export default function ManageBookingsPage() {
             </header>
             <main className="w-full flex flex-col items-center justify-start py-12 px-4">
             {/* Calendar Controls */}
-            <div className="w-full max-w-2xl bg-gray-950 rounded-2xl shadow-xl p-6 mb-8">
+            <div 
+                className="w-full max-w-2xl bg-gray-950 rounded-2xl shadow-xl p-6 mb-8 select-none"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
                 <div className="flex items-center justify-between mb-4">
-                    <button onClick={() => setCalendarMonth(subMonths(calendarMonth, 1))} className="text-gray-400 hover:text-white text-2xl font-bold">&#8592;</button>
-                    <span className="text-lg font-bold text-white">{format(calendarMonth, 'MMMM yyyy')}</span>
-                    <button onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))} className="text-gray-400 hover:text-white text-2xl font-bold">&#8594;</button>
+                    <button 
+                        onClick={() => setCalendarMonth(subMonths(calendarMonth, 1))} 
+                        className="text-gray-400 hover:text-white text-2xl font-bold transition-colors p-2 rounded-lg hover:bg-gray-800"
+                        aria-label="Previous month"
+                    >
+                        &#8592;
+                    </button>
+                    <span className="text-lg font-bold text-white select-none">{format(calendarMonth, 'MMMM yyyy')}</span>
+                    <button 
+                        onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))} 
+                        className="text-gray-400 hover:text-white text-2xl font-bold transition-colors p-2 rounded-lg hover:bg-gray-800"
+                        aria-label="Next month"
+                    >
+                        &#8594;
+                    </button>
                 </div>
                 {/* Weekdays */}
                 <div className="flex justify-between mb-2">
@@ -237,14 +283,14 @@ export default function ManageBookingsPage() {
                 {/* Calendar Grid */}
                 <div className="flex flex-col gap-1">{renderCalendar()}</div>
             </div>
-            <div className="flex gap-4 mb-8">
+            {/* <div className="flex gap-4 mb-8">
                 <button
                     className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold shadow hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                     onClick={() => setShowModify((v) => !v)}
                 >
                     Modify Bookings
                 </button>
-            </div>
+            </div> */}
             {/* Day Bookings Modal */}
             {selectedDay && (
                 <DayBookingsModal
@@ -267,7 +313,7 @@ export default function ManageBookingsPage() {
 // Modal component for day bookings, add, edit, delete
 function DayBookingsModal({ selectedDay, setSelectedDay, bookings, allBookings, setBookings, setDayBookings, format, parseISO }) {
     const [showAdd, setShowAdd] = React.useState(false);
-    const [addForm, setAddForm] = React.useState({ name: "", number: "", service: "", time: "", notes: "" });
+    const [addForm, setAddForm] = React.useState({ name: "", number: "", service: "", time: "", notes: "", advancePaid: false, advanceAmount: "" });
     const [submitting, setSubmitting] = React.useState(false);
     const [editIdx, setEditIdx] = React.useState(null);
     const [editForm, setEditForm] = React.useState({});
@@ -285,7 +331,7 @@ function DayBookingsModal({ selectedDay, setSelectedDay, bookings, allBookings, 
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error);
-            setAddForm({ name: "", number: "", service: "", time: "", notes: "" });
+            setAddForm({ name: "", number: "", service: "", time: "", notes: "", advancePaid: false, advanceAmount: "" });
             setShowAdd(false);
             // Refresh bookings for this day
             const res2 = await fetch("/api/bookings");
@@ -379,6 +425,26 @@ function DayBookingsModal({ selectedDay, setSelectedDay, bookings, allBookings, 
                                         <input name="service" value={editForm.service || ""} onChange={handleEditChange} className="bg-gray-900 text-white px-2 py-1 rounded" required />
                                         <input name="time" value={editForm.time || ""} onChange={handleEditChange} className="bg-gray-900 text-white px-2 py-1 rounded" required type="time" />
                                         <textarea name="notes" value={editForm.notes || ""} onChange={handleEditChange} className="bg-gray-900 text-white px-2 py-1 rounded" rows={2} />
+                                        <div className="flex items-center gap-2">
+                                            <input 
+                                                type="checkbox" 
+                                                id="editAdvancePaid" 
+                                                checked={editForm.advancePaid || false} 
+                                                onChange={(e) => setEditForm({...editForm, advancePaid: e.target.checked, advanceAmount: e.target.checked ? editForm.advanceAmount : ""})}
+                                                className="rounded bg-gray-900 border-gray-700"
+                                            />
+                                            <label htmlFor="editAdvancePaid" className="text-white text-sm">Advance Paid</label>
+                                            {editForm.advancePaid && (
+                                                <input 
+                                                    type="number" 
+                                                    name="advanceAmount" 
+                                                    value={editForm.advanceAmount || ""} 
+                                                    onChange={handleEditChange} 
+                                                    placeholder="Amount" 
+                                                    className="bg-gray-900 text-white px-2 py-1 rounded text-sm w-20"
+                                                />
+                                            )}
+                                        </div>
                                         <div className="flex gap-2 mt-1">
                                             <button type="submit" disabled={submitting} className="bg-blue-600 text-white px-3 py-1 rounded font-semibold">Save</button>
                                             <button type="button" onClick={() => setEditIdx(null)} className="bg-gray-700 text-gray-300 px-3 py-1 rounded font-semibold">Cancel</button>
@@ -391,6 +457,11 @@ function DayBookingsModal({ selectedDay, setSelectedDay, bookings, allBookings, 
                                         <span className="text-gray-400 text-xs">{b.time || ''}</span>
                                         {b.number && <span className="text-gray-500 text-xs">{b.number}</span>}
                                         {b.notes && <span className="text-gray-500 text-xs italic">{b.notes}</span>}
+                                        {b.advancePaid && (
+                                            <span className="text-green-400 text-xs font-semibold">
+                                                ✓ Advance: ₹{b.advanceAmount || 'Paid'}
+                                            </span>
+                                        )}
                                         <div className="flex gap-2 mt-1">
                                             <button type="button" onClick={() => handleEdit(idx, b)} className="bg-blue-600 text-white px-3 py-1 rounded font-semibold text-xs">Edit</button>
                                             <button type="button" onClick={() => handleDelete(b.id)} className="bg-red-600 text-white px-3 py-1 rounded font-semibold text-xs">Delete</button>
@@ -408,6 +479,28 @@ function DayBookingsModal({ selectedDay, setSelectedDay, bookings, allBookings, 
                         <input name="service" value={addForm.service} onChange={e => setAddForm(f => ({ ...f, service: e.target.value }))} className="bg-gray-900 text-white px-2 py-1 rounded" required placeholder="Service" />
                         <input name="time" value={addForm.time} onChange={e => setAddForm(f => ({ ...f, time: e.target.value }))} className="bg-gray-900 text-white px-2 py-1 rounded" required type="time" />
                         <textarea name="notes" value={addForm.notes} onChange={e => setAddForm(f => ({ ...f, notes: e.target.value }))} className="bg-gray-900 text-white px-2 py-1 rounded" rows={2} placeholder="Notes (optional)" />
+                        
+                        {/* Advance Payment Section */}
+                        <div className="flex items-center gap-2 bg-gray-800 p-2 rounded">
+                            <input 
+                                type="checkbox" 
+                                id="advancePaid" 
+                                checked={addForm.advancePaid} 
+                                onChange={(e) => setAddForm(f => ({ ...f, advancePaid: e.target.checked, advanceAmount: e.target.checked ? f.advanceAmount : "" }))}
+                                className="rounded bg-gray-900 border-gray-700"
+                            />
+                            <label htmlFor="advancePaid" className="text-white text-sm font-medium">Advance Paid</label>
+                            {addForm.advancePaid && (
+                                <input 
+                                    type="number" 
+                                    value={addForm.advanceAmount} 
+                                    onChange={e => setAddForm(f => ({ ...f, advanceAmount: e.target.value }))} 
+                                    placeholder="Amount" 
+                                    className="bg-gray-900 text-white px-2 py-1 rounded text-sm w-24 ml-2"
+                                />
+                            )}
+                        </div>
+                        
                         <div className="flex gap-2 mt-1">
                             <button type="submit" disabled={submitting} className="bg-green-600 text-white px-3 py-1 rounded font-semibold">Add</button>
                             <button type="button" onClick={() => setShowAdd(false)} className="bg-gray-700 text-gray-300 px-3 py-1 rounded font-semibold">Cancel</button>
