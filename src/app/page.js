@@ -12,7 +12,7 @@ import { getCustomerRecords } from '@/lib/firebase';
 export default function HomePage() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState({ today: 0, month: 0, total: 0 });
+  const [stats, setStats] = useState({ today: 0, todayCollection: 0, month: 0, total: 0 });
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
@@ -20,16 +20,19 @@ export default function HomePage() {
         const records = await getCustomerRecords();
         const todayStr = new Date().toLocaleDateString('en-CA');
         const monthStr = new Date().toISOString().slice(0, 7);
-        let today = 0, month = 0, total = 0;
+        let today = 0, todayCollection = 0, month = 0, total = 0;
         records.forEach(rec => {
           const dateObj = rec.createdAt?.toDate ? rec.createdAt.toDate() : new Date(rec.createdAt);
           const dateStr = dateObj.toLocaleDateString('en-CA');
           const monthKey = dateObj.toISOString().slice(0, 7);
-          if (dateStr === todayStr) today++;
+          if (dateStr === todayStr) {
+            today++;
+            todayCollection += parseFloat(rec.amount) || 0;
+          }
           if (monthKey === monthStr) month++;
           total += parseFloat(rec.amount) || 0;
         });
-        setStats({ today, month, total });
+        setStats({ today, todayCollection, month, total });
       })();
     }
   }, [loading, isAuthenticated, router]);
@@ -195,6 +198,17 @@ export default function HomePage() {
                     <p className="text-2xl font-bold text-white">{stats.today}</p>
                   </div>
                   <Users className="h-8 w-8 text-pink-500" />
+                </div>
+              </div>
+              <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-300">Today&apos;s Collection</p>
+                    <p className="text-2xl font-bold text-white">₹{stats.todayCollection.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className="h-8 w-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">₹</span>
+                  </div>
                 </div>
               </div>
               <div className="bg-gray-900 rounded-xl p-6 shadow-lg">

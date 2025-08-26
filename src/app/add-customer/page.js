@@ -29,6 +29,21 @@ const SERVICES = [
   "Smoothening",
   "Nano plastic",
   "Keratin",
+  // Newly added services (avoiding duplicates)
+  "Cleanup",
+  "Underarms",
+  "Hand wax",
+  "Leg wax",
+  "Upper/chin lip wax",
+  "Face wax",
+  "Highlight",
+  "Hair colour",
+  "Mehendi hair dye",
+  "Hairwash",
+  "Hairstyle",
+  "Makeup",
+  "Saree draping",
+  "Hair ironing",
   "Other"
 ];
 
@@ -48,7 +63,8 @@ export default function AddCustomerPage() {
   });
   const [selectedServices, setSelectedServices] = useState([]);
   const [serviceToAdd, setServiceToAdd] = useState('');
-  const [customService, setCustomService] = useState('');
+  const [customService, setCustomService] = useState(''); // for 'Other' selection
+  const [manualService, setManualService] = useState(''); // always-visible manual entry
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -296,10 +312,34 @@ export default function AddCustomerPage() {
                         value={customService}
                         onChange={e => setCustomService(e.target.value)}
                         className="w-full py-3 px-4 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
-                        placeholder="Enter custom service name"
+                        placeholder="Enter custom service name for 'Other'"
                       />
                     </div>
                   )}
+                  {/* Separate manual service entry (independent of dropdown) */}
+                  <div className="mt-4 flex gap-2">
+                    <input
+                      type="text"
+                      value={manualService}
+                      onChange={e => setManualService(e.target.value)}
+                      className="flex-1 py-3 px-4 border border-gray-800 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
+                      placeholder="Type any service and click Add"
+                    />
+                    <button
+                      type="button"
+                      className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-all"
+                      onClick={() => {
+                        const val = manualService.trim();
+                        if (!val) return;
+                        if (!selectedServices.includes(val)) {
+                          setSelectedServices(prev => [...prev, val]);
+                        }
+                        setManualService('');
+                      }}
+                    >
+                      Add
+                    </button>
+                  </div>
                   {selectedServices.length > 0 && (
                     <div className="mt-4">
                       <div className="flex items-center mb-2">
