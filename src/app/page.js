@@ -12,7 +12,7 @@ import { getCustomerRecords } from '@/lib/firebase';
 export default function HomePage() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState({ today: 0, todayCollection: 0, month: 0, total: 0 });
+  const [stats, setStats] = useState({ today: 0, todayCollection: 0, month: 0, monthCollection: 0, total: 0, totalCustomers: 0 });
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
@@ -20,19 +20,36 @@ export default function HomePage() {
         const records = await getCustomerRecords();
         const todayStr = new Date().toLocaleDateString('en-CA');
         const monthStr = new Date().toISOString().slice(0, 7);
-        let today = 0, todayCollection = 0, month = 0, total = 0;
+        let today = 0, todayCollection = 0, month = 0, monthCollection = 0, total = 0;
+        const totalCustomerSet = new Set();
+        const monthCustomerSet = new Set();
         records.forEach(rec => {
           const dateObj = rec.createdAt?.toDate ? rec.createdAt.toDate() : new Date(rec.createdAt);
           const dateStr = dateObj.toLocaleDateString('en-CA');
           const monthKey = dateObj.toISOString().slice(0, 7);
+          const amt = parseFloat(rec.amount) || 0;
+          const custKey = (rec.phone || rec.name || '').trim().toLowerCase();
           if (dateStr === todayStr) {
             today++;
-            todayCollection += parseFloat(rec.amount) || 0;
+            todayCollection += amt;
           }
-          if (monthKey === monthStr) month++;
-          total += parseFloat(rec.amount) || 0;
+          if (monthKey === monthStr) {
+            month++;
+            monthCollection += amt;
+            if (custKey) monthCustomerSet.add(custKey);
+          }
+          if (custKey) totalCustomerSet.add(custKey);
+          total += amt;
         });
-        setStats({ today, todayCollection, month, total });
+        setStats({
+          today,
+          todayCollection,
+          month,
+          monthCollection,
+          total,
+          totalCustomers: records.length, // show total records/visits
+          monthCustomers: monthCustomerSet.size
+        });
       })();
     }
   }, [loading, isAuthenticated, router]);
@@ -191,6 +208,7 @@ export default function HomePage() {
               Quick Overview
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {/* 1. Today's Customers */}
               <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
@@ -200,6 +218,7 @@ export default function HomePage() {
                   <Users className="h-8 w-8 text-pink-500" />
                 </div>
               </div>
+              {/* 2. Today's Collection */}
               <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
@@ -211,19 +230,43 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+              {/* 3. This Month's Customers */}
               <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-300">This Month</p>
-                    <p className="text-2xl font-bold text-white">{stats.month}</p>
+                    <p className="text-sm font-medium text-gray-300">This Month&apos;s Customers</p>
+                    <p className="text-2xl font-bold text-white">{stats.monthCustomers}</p>
                   </div>
-                  <History className="h-8 w-8 text-green-500" />
+                  <Users className="h-8 w-8 text-purple-500" />
                 </div>
               </div>
+              {/* 4. This Month's Collection */}
               <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-300">Total Revenue</p>
+                    <p className="text-sm font-medium text-gray-300">This Month&apos;s Collection</p>
+                    <p className="text-2xl font-bold text-white">₹{stats.monthCollection.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className="h-8 w-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">₹</span>
+                  </div>
+                </div>
+              </div>
+              {/* 5. Total Customers */}
+              <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-300">Total Customers</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalCustomers}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-green-500" />
+                </div>
+              </div>
+              {/* 6. Total Collection */}
+              <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-300">Total Collection</p>
                     <p className="text-2xl font-bold text-white">₹{stats.total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
                   </div>
                   <div className="h-8 w-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">

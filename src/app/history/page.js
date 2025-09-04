@@ -285,7 +285,7 @@ export default function HistoryPage() {
                   onChange={(e) => setSelectedMonth(e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-gray-900 ${!selectedMonth ? 'text-gray-400' : 'text-white'}`}
                 >
-                  <option value="" disabled className="text-gray-400">All Months</option>
+                  <option value="" className="text-gray-400">All Months</option>
                   {getMonthOptions().map(month => (
                     <option key={month} value={month}>
                       {format(parseISO(month + '-01'), 'MMMM yyyy')}
