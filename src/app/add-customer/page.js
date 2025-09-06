@@ -3,53 +3,58 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-// import { addCustomerRecord } from '@/lib/firebase';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, User, Phone, Scissors, DollarSign, CreditCard, Save, CheckCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  User,
+  Save,
+  CheckCircle,
+  DollarSign,
+  CreditCard,
+} from 'lucide-react';
 import ClientOnly from '@/components/ClientOnly';
 
 const SERVICES = [
-  "Eyebrow",
-  "Haircut",
-  "Bleach",
-  "Facial",
-  "Wax",
-  "Forehead",
-  "Upper lip",
-  "Pedicure",
-  "Manicure",
-  "Hair spa",
-  "Hair oil massage",
-  "Hydra facial",
-  "Korean Glass facial",
-  "Body massage",
-  "Bridal make up",
-  "Party make up",
-  "Straightening",
-  "Smoothening",
-  "Nano plastic",
-  "Keratin",
-  // Newly added services (avoiding duplicates)
-  "Cleanup",
-  "Underarms",
-  "Hand wax",
-  "Leg wax",
-  "Upper/chin lip wax",
-  "Face wax",
-  "Highlight",
-  "Hair colour",
-  "Mehendi hair dye",
-  "Hairwash",
-  "Hairstyle",
-  "Makeup",
-  "Saree draping",
-  "Hair ironing",
-  "Other"
+  'Eyebrow',
+  'Haircut',
+  'Bleach',
+  'Facial',
+  'Wax',
+  'Forehead',
+  'Upper lip',
+  'Pedicure',
+  'Manicure',
+  'Hair spa',
+  'Hair oil massage',
+  'Hydra facial',
+  'Korean Glass facial',
+  'Body massage',
+  'Bridal make up',
+  'Party make up',
+  'Straightening',
+  'Smoothening',
+  'Nano plastic',
+  'Keratin',
+  'Cleanup',
+  'Underarms',
+  'Hand wax',
+  'Leg wax',
+  'Upper/chin lip wax',
+  'Face wax',
+  'Highlight',
+  'Hair colour',
+  'Mehendi hair dye',
+  'Hairwash',
+  'Hairstyle',
+  'Makeup',
+  'Saree draping',
+  'Hair ironing',
+  'Other',
 ];
 
 const PAYMENT_MODES = [
   { id: 'cash', label: 'Cash', icon: DollarSign },
-  { id: 'upi', label: 'UPI', icon: CreditCard }
+  { id: 'upi', label: 'UPI', icon: CreditCard },
 ];
 
 export default function AddCustomerPage() {
@@ -59,12 +64,12 @@ export default function AddCustomerPage() {
     name: '',
     phone: '',
     amount: '',
-    paymentMode: 'cash'
+    paymentMode: 'cash',
   });
   const [selectedServices, setSelectedServices] = useState([]);
   const [serviceToAdd, setServiceToAdd] = useState('');
-  const [customService, setCustomService] = useState(''); // for 'Other' selection
-  const [manualService, setManualService] = useState(''); // always-visible manual entry
+  const [customService, setCustomService] = useState('');
+  const [manualService, setManualService] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -86,9 +91,9 @@ export default function AddCustomerPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -101,17 +106,15 @@ export default function AddCustomerPage() {
     setSubmitting(true);
     setSuccess(false);
     try {
-
-      // Save to Firestore and Google Sheets via API route
       toast.loading('Saving to database and Google Sheets...', { id: 'saving' });
       const dataToSave = {
         ...formData,
-        services: selectedServices
+        services: selectedServices,
       };
       const response = await fetch('/api/add-customer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSave)
+        body: JSON.stringify(dataToSave),
       });
       const result = await response.json();
       if (result.success) {
@@ -120,17 +123,15 @@ export default function AddCustomerPage() {
         throw new Error(result.error || 'Failed to save');
       }
 
-      // Success
       setSuccess(true);
       toast.success('Customer record added successfully! 🎉');
 
-      // Reset form after a short delay
       setTimeout(() => {
         setFormData({
           name: '',
           phone: '',
           amount: '',
-          paymentMode: 'cash'
+          paymentMode: 'cash',
         });
         setSelectedServices([]);
         setServiceToAdd('');
@@ -140,7 +141,9 @@ export default function AddCustomerPage() {
     } catch (error) {
       console.error('Error adding customer record:', error);
       if (error.message.includes('sheets')) {
-        toast.error('Saved to database but failed to log to Google Sheets. Please check configuration.');
+        toast.error(
+          'Saved to database but failed to log to Google Sheets. Please check configuration.'
+        );
       } else {
         toast.error('Failed to add customer record. Please try again.');
       }
@@ -156,9 +159,7 @@ export default function AddCustomerPage() {
           <div className="mx-auto h-16 w-16 bg-green-900 rounded-full flex items-center justify-center mb-6">
             <CheckCircle className="h-8 w-8 text-green-300" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Success!
-          </h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Success!</h2>
           <p className="text-gray-300 mb-6">
             Customer record has been saved to both database and Google Sheets.
           </p>
@@ -182,14 +183,16 @@ export default function AddCustomerPage() {
   }
 
   return (
-    <ClientOnly fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto"></div>
-          <p className="mt-4 text-gray-300">Loading...</p>
+    <ClientOnly
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto"></div>
+            <p className="mt-4 text-gray-300">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         {/* Header */}
         <header className="bg-gray-950 shadow-sm border-b border-gray-800">
@@ -208,7 +211,9 @@ export default function AddCustomerPage() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Add New Customer</h1>
-                  <p className="text-sm text-gray-400">Record customer details and services</p>
+                  <p className="text-sm text-gray-400">
+                    Record customer details and services
+                  </p>
                 </div>
               </div>
             </div>
@@ -218,221 +223,213 @@ export default function AddCustomerPage() {
         {/* Main Content */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-gray-950 rounded-2xl shadow-xl p-8">
-            <div className="mb-6 p-4 bg-blue-900 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-200 mb-2">Data Storage</h3>
-              <p className="text-xs text-blue-300">
-                Customer records will be automatically saved to both Firebase database and Google Sheets for backup and reporting.
-              </p>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Customer Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-semibold text-white mb-2"
+                >
                   Customer Name *
                 </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
-                    placeholder="Enter customer name"
-                  />
-                </div>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none transition-colors"
+                  placeholder="Enter customer name"
+                />
               </div>
 
               {/* Phone Number */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number (Optional)
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-semibold text-white mb-2"
+                >
+                  Phone Number *
                 </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
-                    placeholder="Enter phone number"
-                  />
-                </div>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none transition-colors"
+                  placeholder="Enter phone number"
+                />
               </div>
 
               {/* Service */}
               <div>
-                <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-2">
-                  Service Provided *
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Services *
                 </label>
-                <div className="relative">
-                  <Scissors className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" style={{top: '50%', transform: 'translateY(-50%)'}} />
-                  <div className="flex gap-2">
-                    <select
-                      id="service"
-                      name="service"
-                      value={serviceToAdd}
-                      onChange={e => setServiceToAdd(e.target.value)}
-                      className={`w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors appearance-none bg-gray-900 ${!serviceToAdd ? 'text-gray-400' : 'text-white'}`}
-                    >
-                      <option value="" disabled selected={serviceToAdd === ''} className="text-gray-500">Select a service</option>
-                      {SERVICES.map((service) => (
-                        <option key={service} value={service}>
-                          {service}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      className="bg-pink-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-600 transition-all"
-                      onClick={() => {
-                        if (serviceToAdd && !selectedServices.includes(serviceToAdd)) {
-                          if (serviceToAdd === 'Other' && customService) {
-                            setSelectedServices(prev => [...prev, customService]);
-                            setCustomService('');
-                          } else if (serviceToAdd !== 'Other') {
-                            setSelectedServices(prev => [...prev, serviceToAdd]);
-                          }
-                          setServiceToAdd('');
+                <div className="flex gap-2 mb-2">
+                  <select
+                    value={serviceToAdd}
+                    onChange={(e) => setServiceToAdd(e.target.value)}
+                    className="flex-1 px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-white focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none"
+                  >
+                    <option value="">Select a service</option>
+                    {SERVICES.map((service) => (
+                      <option key={service} value={service}>
+                        {service}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-all"
+                    onClick={() => {
+                      if (serviceToAdd && !selectedServices.includes(serviceToAdd)) {
+                        if (serviceToAdd === 'Other' && customService) {
+                          setSelectedServices((prev) => [...prev, customService]);
+                          setCustomService('');
+                        } else if (serviceToAdd !== 'Other') {
+                          setSelectedServices((prev) => [...prev, serviceToAdd]);
                         }
-                      }}
-                    >
-                      Add Service
-                    </button>
-                  </div>
-                  {serviceToAdd === 'Other' && (
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        value={customService}
-                        onChange={e => setCustomService(e.target.value)}
-                        className="w-full py-3 px-4 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
-                        placeholder="Enter custom service name for 'Other'"
-                      />
-                    </div>
-                  )}
-                  {/* Separate manual service entry (independent of dropdown) */}
-                  <div className="mt-4 flex gap-2">
+                        setServiceToAdd('');
+                      }
+                    }}
+                  >
+                    Add Service
+                  </button>
+                </div>
+                {/* Custom Service Input */}
+                {serviceToAdd === 'Other' && (
+                  <div className="mt-2">
                     <input
                       type="text"
-                      value={manualService}
-                      onChange={e => setManualService(e.target.value)}
-                      className="flex-1 py-3 px-4 border border-gray-800 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100"
-                      placeholder="Type any service and click Add"
+                      value={customService}
+                      onChange={(e) => setCustomService(e.target.value)}
+                      placeholder="Enter custom service"
+                      className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none"
                     />
-                    <button
-                      type="button"
-                      className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-all"
-                      onClick={() => {
-                        const val = manualService.trim();
-                        if (!val) return;
-                        if (!selectedServices.includes(val)) {
-                          setSelectedServices(prev => [...prev, val]);
-                        }
-                        setManualService('');
-                      }}
-                    >
-                      Add
-                    </button>
                   </div>
-                  {selectedServices.length > 0 && (
-                    <div className="mt-4">
-                      <div className="flex items-center mb-2">
-                        <Scissors className="h-4 w-4 text-gray-300 mr-2" />
-                        <label className="block text-sm font-medium text-gray-300">Selected Services:</label>
-                      </div>
-                      <ul className="list-disc pl-7">
-                        {selectedServices.map((srv, idx) => (
-                          <li key={idx} className="flex justify-between items-center mb-1">
-                            <span>{srv}</span>
-                            <button
-                              type="button"
-                              className="ml-2 text-xs text-red-400 hover:underline"
-                              onClick={() => setSelectedServices(selectedServices.filter((_, i) => i !== idx))}
-                            >Remove</button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                )}
+
+                {/* Custom Service Manual Entry */}
+                <div className="mt-4 flex gap-2">
+                  <input
+                    type="text"
+                    value={manualService}
+                    onChange={(e) => setManualService(e.target.value)}
+                    className="flex-1 py-3 px-4 border border-gray-700 rounded-lg bg-gray-900 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none"
+                    placeholder="Type any service and click Add"
+                  />
+                  <button
+                    type="button"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-all"
+                    onClick={() => {
+                      const val = manualService.trim();
+                      if (!val) return;
+                      if (!selectedServices.includes(val)) {
+                        setSelectedServices((prev) => [...prev, val]);
+                      }
+                      setManualService('');
+                    }}
+                  >
+                    Add
+                  </button>
                 </div>
               </div>
+                {/* Selected Services */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selectedServices.map((service, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1 bg-purple-600 text-white rounded-full text-sm flex items-center gap-2"
+                    >
+                      {service}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedServices((prev) =>
+                            prev.filter((s) => s !== service)
+                          )
+                        }
+                        className="text-red-400 hover:underline"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                
 
               {/* Amount */}
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                  Amount (₹) *
+                <label
+                  htmlFor="amount"
+                  className="block text-sm font-semibold text-white mb-2"
+                >
+                  Amount *
                 </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type="number"
-                    id="amount"
-                    name="amount"
-                    required
-                    min="0"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-800 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-900 text-white placeholder:text-gray-400 placeholder:opacity-100 text-base font-medium"
-                    placeholder="Enter amount"
-                  />
-                </div>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  required
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none transition-colors"
+                  placeholder="Enter amount"
+                />
               </div>
 
               {/* Payment Mode */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-white mb-2">
                   Payment Mode *
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  {PAYMENT_MODES.map((mode) => {
-                    const Icon = mode.icon;
-                    return (
-                      <label
-                        key={mode.id}
-                        className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
+                  {PAYMENT_MODES.map((mode) => (
+                    <label
+                      key={mode.id}
+                      className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
+                        formData.paymentMode === mode.id
+                          ? 'border-purple-600 bg-purple-600 hover:bg-purple-700'
+                          : 'border-gray-800 bg-gray-900 hover:border-purple-500 hover:bg-gray-800'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMode"
+                        value={mode.id}
+                        checked={formData.paymentMode === mode.id}
+                        onChange={handleInputChange}
+                        className="sr-only"
+                      />
+                      <span
+                        className={`font-medium ${
                           formData.paymentMode === mode.id
-                            ? 'border-pink-500 bg-pink-900'
-                            : 'border-gray-800 hover:border-gray-600 bg-gray-900'
+                            ? 'text-pink-100'
+                            : 'text-gray-300'
                         }`}
                       >
-                        <input
-                          type="radio"
-                          name="paymentMode"
-                          value={mode.id}
-                          checked={formData.paymentMode === mode.id}
-                          onChange={handleInputChange}
-                          className="sr-only"
-                        />
-                        <Icon className={`h-5 w-5 mr-3 ${
-                          formData.paymentMode === mode.id ? 'text-pink-500' : 'text-gray-400'
-                        }`} />
-                        <span className={`font-medium ${
-                          formData.paymentMode === mode.id ? 'text-pink-200' : 'text-gray-300'
-                        }`}>
-                          {mode.label}
-                        </span>
-                      </label>
-                    );
-                  })}
+                        {mode.label}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit */}
               <div className="pt-6">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <Save className="h-5 w-5" />
-                  <span>{submitting ? 'Saving...' : 'Save Customer Record'}</span>
+                  <span>
+                    {submitting ? 'Saving...' : 'Save Customer Record'}
+                  </span>
                 </button>
               </div>
             </form>

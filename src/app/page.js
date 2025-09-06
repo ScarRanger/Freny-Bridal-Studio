@@ -3,13 +3,12 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Users, History, LogOut, Plus } from 'lucide-react';
-import { signOutUser } from '@/lib/firebase';
+import { Users, History, LogOut, Plus, Menu } from 'lucide-react';
+import { signOutUser, getCustomerRecords } from '@/lib/firebase';
 import { toast } from 'react-hot-toast';
 import ClientOnly from '@/components/ClientOnly';
-import { getCustomerRecords } from '@/lib/firebase';
-
 export default function HomePage() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState({ today: 0, todayCollection: 0, month: 0, monthCollection: 0, total: 0, totalCustomers: 0 });
@@ -98,27 +97,41 @@ export default function HomePage() {
     }>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         {/* Header */}
-        <header className="bg-gray-950 shadow-sm border-b border-gray-800">
+        <header className="bg-gray-950 shadow-sm border-b border-gray-800 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">F</span>
+              <div className="flex items-center justify-between w-full">
+                <h1 className="text-xl font-bold text-white tracking-wide">FBS</h1>
+                <div className="relative">
+                  <button
+                    className="ml-2 p-2 rounded-lg bg-gray-900 hover:bg-gray-800 text-pink-400 focus:outline-none"
+                    onClick={() => setMenuOpen((v) => !v)}
+                  >
+                    <Menu className="h-6 w-6" />
+                  </button>
+                  {menuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-950 border border-gray-800 rounded-lg shadow-lg z-50">
+                      <button
+                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-gray-800 rounded-t-lg"
+                        onClick={() => { setMenuOpen(false); router.push('/manage-bookings'); }}
+                      >
+                        Manage Bookings
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-gray-800"
+                        onClick={() => { setMenuOpen(false); router.push('/analytics'); }}
+                      >
+                        Analytics
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-3 text-sm text-pink-400 hover:bg-gray-800 rounded-b-lg border-t border-gray-800 flex items-center gap-2"
+                        onClick={() => { setMenuOpen(false); handleLogout(); }}
+                      >
+                        <LogOut className="h-5 w-5" /> Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">Freny Bridal Studio</h1>
-                  <p className="text-sm text-gray-500"></p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-pink-200">Welcome, {user?.email}</span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 bg-gray-900 border border-pink-500 text-pink-400 hover:bg-gray-800 hover:text-pink-300 transition-colors rounded-lg px-4 py-2 font-semibold shadow"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
               </div>
             </div>
           </div>
@@ -126,78 +139,43 @@ export default function HomePage() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Welcome to Freny Bridal Studio
-            </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Manage your beauty parlor operations efficiently 
-            </p>
-          </div>
+          {/* ...removed welcome and description... */}
 
           {/* Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Add Customer Card */}
-            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div
+              className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+              onClick={() => router.push('/add-customer')}
+              tabIndex={0}
+              role="button"
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') router.push('/add-customer'); }}
+            >
               <div className="text-center">
                 <div className="mx-auto h-16 w-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
                   <Plus className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-4">
+                <h3 className="text-2xl font-bold text-white mb-2">
                   Add New Customer
                 </h3>
-                <p className="text-gray-300 mb-6">
-                  Record customer details, services provided, and payment information
-                </p>
-                <button
-                  onClick={() => router.push('/add-customer')}
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200"
-                >
-                  Add Customer
-                </button>
               </div>
             </div>
 
             {/* View History Card */}
-            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div
+              className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+              onClick={() => router.push('/history')}
+              tabIndex={0}
+              role="button"
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') router.push('/history'); }}
+            >
               <div className="text-center">
                 <div className="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-6">
                   <History className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-4">
+                <h3 className="text-2xl font-bold text-white mb-2">
                   View History
                 </h3>
-                <p className="text-gray-300 mb-6">
-                  Browse past customer records, edit entries, and manage your data
-                </p>
-                <button
-                  onClick={() => router.push('/history')}
-                  className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200"
-                >
-                  View History
-                </button>
-              </div>
-            </div>
-
-            {/* Manage Bookings Card */}
-            <div className="bg-gray-950 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="text-center">
-                <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mb-6">
-                  {/* You can use a calendar or book icon here if you add one, or just a Plus for now */}
-                  <Plus className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">
-                  Manage Bookings
-                </h3>
-                <p className="text-gray-300 mb-6">
-                  Add and manage upcoming bookings for your customers
-                </p>
-                <button
-                  onClick={() => router.push('/manage-bookings')}
-                  className="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-                >
-                  Manage Bookings
-                </button>
               </div>
             </div>
           </div>

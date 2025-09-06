@@ -7,155 +7,34 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ClientOnly from '@/components/ClientOnly';
 import { useAuth } from '@/context/AuthContext';
-
-// ---------- Bar Chart ----------
-function BarChart({ data, height = 200, color = '#8b5cf6' }) {
-    if (!data?.length) return <div className="text-xs text-gray-500">No data</div>;
-
-    const rawMax = Math.max(...data.map(d => d.value), 1);
-    const max = rawMax * 1.1;
-    const paddingBottom = 35;
-    const chartHeight = height - paddingBottom;
-    const barWidthPct = Math.min(20, 60 / data.length); // adaptive width
-    const interval = Math.ceil(data.length / 7); // ~7 labels max
-    const singleMonth = new Set(data.map(d => d.label.slice(0, 2))).size === 1;
-
-    return (
-        <svg
-            viewBox={`0 0 100 ${height}`}
-            className="w-full"
-            preserveAspectRatio="none"
-            role="img"
-            aria-label="Bar chart"
-        >
-            {/* Gridlines */}
-            {[0, 25, 50, 75, 100].map(g => (
-                <line
-                    key={g}
-                    x1={0}
-                    x2={100}
-                    y1={(g / 100) * chartHeight}
-                    y2={(g / 100) * chartHeight}
-                    stroke="#374151"
-                    strokeWidth={0.3}
-                />
-            ))}
-
-            {/* Bars */}
-            {data.map((d, i) => {
-                const slot = 100 / data.length;
-                const barWidth = slot * (barWidthPct / 100);
-                const x = i * slot + (slot - barWidth) / 2;
-                const pct = (d.value / max) || 0;
-                const h = Math.max(pct * chartHeight, 2);
-                const y = chartHeight - h;
-                return (
-                    <g key={i}>
-                        <rect
-                            x={x}
-                            y={y}
-                            width={barWidth}
-                            height={h}
-                            fill={color}
-                            rx={0.8}
-                        />
-                        <title>{`${d.label}: ₹${d.value}`}</title>
-                    </g>
-                );
-            })}
-
-            {/* Y-axis labels */}
-            {[0, 0.5, 1].map((p, idx) => (
-                <text
-                    key={idx}
-                    x={1}
-                    y={(1 - p) * chartHeight - 2}
-                    fontSize={5}
-                    fill="#9ca3af"
-                    textAnchor="start"
-                >
-                    ₹{Math.round(rawMax * p)}
-                </text>
-            ))}
-
-            {/* X-axis labels */}
-            {data.map((d, i) => {
-                if (i % interval !== 0) return null;
-                const slot = 100 / data.length;
-                const x = i * slot + slot / 2;
-                const raw = d.label;
-                const lbl = singleMonth ? raw.slice(3) : raw;
-                return (
-                    <g
-                        key={`lbl-${i}`}
-                        transform={`translate(${x},${chartHeight + 25}) rotate(-40)`}
-                    >
-                        <text fontSize={5} textAnchor="end" fill="#9ca3af">
-                            {lbl}
-                        </text>
-                    </g>
-                );
-            })}
-        </svg>
-    );
-}
-
-// ---------- Pie Chart ----------
-function PieChart({ data, size = 140 }) {
-    if (!data?.length) return <div className="text-xs text-gray-500">No data</div>;
-
-    const total = data.reduce((s, d) => s + d.value, 0) || 1;
-    let cumulative = 0;
-    const colors = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#f472b6'];
-
-    return (
-        <svg
-            role="img"
-            aria-label="Pie chart"
-            viewBox="0 0 32 32"
-            width={size}
-            height={size}
-            className="mx-auto"
-        >
-            {data.map((d, i) => {
-                const start = (cumulative / total) * 2 * Math.PI;
-                const slice = (d.value / total) * 2 * Math.PI;
-                cumulative += d.value;
-                const end = start + slice;
-
-                const x1 = 16 + 16 * Math.sin(start);
-                const y1 = 16 - 16 * Math.cos(start);
-                const x2 = 16 + 16 * Math.sin(end);
-                const y2 = 16 - 16 * Math.cos(end);
-
-                const large = slice > Math.PI ? 1 : 0;
-                const path = `M16 16 L ${x1} ${y1} A 16 16 0 ${large} 1 ${x2} ${y2} Z`;
-
-                return (
-                    <g key={i}>
-                        <path
-                            d={path}
-                            fill={colors[i % colors.length]}
-                            stroke="#111827"
-                            strokeWidth="0.2"
-                        />
-                        {slice > 0.4 && (
-                            <text
-                                x={16 + 8 * Math.sin((start + end) / 2)}
-                                y={16 - 8 * Math.cos((start + end) / 2)}
-                                textAnchor="middle"
-                                fill="white"
-                                fontSize="2.5"
-                            >
-                                {((d.value / total) * 100).toFixed(0)}%
-                            </text>
-                        )}
-                    </g>
-                );
-            })}
-        </svg>
-    );
-}
+import { Bar, Pie } from 'react-chartjs-2';
+import {
+    Chart,
+    LineController,
+    LineElement,
+    PointElement,
+    BarController,
+    BarElement,
+    ArcElement,
+    CategoryScale,
+    LinearScale,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+Chart.register(
+    LineController,
+    LineElement,
+    PointElement,
+    BarController,
+    BarElement,
+    ArcElement,
+    CategoryScale,
+    LinearScale,
+    Title,
+    Tooltip,
+    Legend
+);
 
 // ---------- Main Page ----------
 export default function AnalyticsPage() {
@@ -164,6 +43,7 @@ export default function AnalyticsPage() {
 
     const [records, setRecords] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
+    const [monthFilter, setMonthFilter] = useState('all');
 
     useEffect(() => {
         if (!loading && !isAuthenticated) router.push('/login');
@@ -183,27 +63,46 @@ export default function AnalyticsPage() {
         if (isAuthenticated) load();
     }, [isAuthenticated, load]);
 
+    // Get available months from records
+    const months = useMemo(() => {
+        const set = new Set();
+        records.forEach(r => {
+            const date = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+            const key = format(date, 'yyyy-MM');
+            set.add(key);
+        });
+        return Array.from(set).sort().reverse();
+    }, [records]);
+
+    // Filter records by month
+    const filteredRecords = useMemo(() => {
+        if (monthFilter === 'all') return records;
+        return records.filter(r => {
+            const date = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+            return format(date, 'yyyy-MM') === monthFilter;
+        });
+    }, [records, monthFilter]);
+
     const stats = useMemo(() => {
-        if (!records.length) {
+        if (!filteredRecords.length) {
             return {
                 total: 0,
                 totalVisits: 0,
                 uniqueCustomers: 0,
                 avgTicket: 0,
-                repeat: 0,
                 dailySeries: [],
-                paymentSeries: [],
-                repeatSplit: []
+                serviceSeries: [],
+                paymentSeries: []
             };
         }
 
         const dailyMap = new Map();
-        const customerVisits = new Map();
+        const serviceCount = new Map();
         let total = 0;
         let cash = 0;
         let upi = 0;
 
-        records.forEach((r) => {
+        filteredRecords.forEach((r) => {
             const date = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
             const dayKey = format(date, 'yyyy-MM-dd');
             dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + (parseFloat(r.amount) || 0));
@@ -214,38 +113,39 @@ export default function AnalyticsPage() {
             if (r.paymentMode === 'cash') cash += amt;
             else if (r.paymentMode === 'upi') upi += amt;
 
-            const custKey = (r.phone || r.name || '').trim().toLowerCase();
-            if (custKey) customerVisits.set(custKey, (customerVisits.get(custKey) || 0) + 1);
+            // Count services
+            const services = Array.isArray(r.services) ? r.services : [r.services || r.service].filter(Boolean);
+            services.forEach(s => {
+                if (s) serviceCount.set(s, (serviceCount.get(s) || 0) + 1);
+            });
         });
 
         const dailySeries = Array.from(dailyMap.entries())
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([label, value]) => ({ label: label.slice(5), value }));
 
+        const serviceSeries = Array.from(serviceCount.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(([label, value]) => ({ label, value }));
+
         const paymentSeries = [
             cash ? { label: 'Cash', value: cash } : null,
             upi ? { label: 'UPI', value: upi } : null
         ].filter(Boolean);
 
-        const totalVisits = records.length;
-        const uniqueCustomers = customerVisits.size;
+        const totalVisits = filteredRecords.length;
         const avgTicket = totalVisits ? total / totalVisits : 0;
-        const repeat = Array.from(customerVisits.values()).filter((v) => v > 1).length;
 
         return {
             total,
             totalVisits,
-            uniqueCustomers,
             avgTicket,
-            repeat,
             dailySeries,
-            paymentSeries,
-            repeatSplit: [
-                { label: 'Repeat', value: repeat },
-                { label: 'New', value: Math.max(uniqueCustomers - repeat, 0) }
-            ]
+            serviceSeries,
+            paymentSeries
         };
-    }, [records]);
+    }, [filteredRecords]);
 
     if (loading || !isAuthenticated) return null;
 
@@ -279,67 +179,140 @@ export default function AnalyticsPage() {
 
                 {/* Main */}
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+                    {/* Month Filter */}
+                    <div className="mb-6 flex items-center gap-3">
+                        <label htmlFor="monthFilter" className="text-sm text-gray-400">Month:</label>
+                        <select
+                            id="monthFilter"
+                            value={monthFilter}
+                            onChange={e => setMonthFilter(e.target.value)}
+                            className="bg-gray-900 border border-gray-700 text-gray-200 px-2 py-1 rounded"
+                        >
+                            <option value="all">All</option>
+                            {months.map(m => (
+                                <option key={m} value={m}>{format(new Date(m + '-01'), 'MMMM yyyy')}</option>
+                            ))}
+                        </select>
+                    </div>
                     {!stats.totalVisits ? (
                         <div className="text-center py-16 text-gray-400">No data yet</div>
                     ) : (
                         <>
-                            <Section title="Daily Revenue (₹)" desc="Daily totals as bars.">
-                                <BarChart data={stats.dailySeries} height={220} color="#ec4899" />
+                            <Section title="Daily Revenue (₹)" desc="Daily totals as bars and trend line.">
+                                <div style={{ position: 'relative', width: '100%', height: '300px' }}>
+                                    <Bar
+                                        data={{
+                                            labels: stats.dailySeries.map(d => d.label),
+                                            datasets: [
+                                                {
+                                                    type: 'bar',
+                                                    label: 'Revenue',
+                                                    data: stats.dailySeries.map(d => d.value),
+                                                    backgroundColor: '#ec4899',
+                                                },
+                                                {
+                                                    type: 'line',
+                                                    label: 'Trend',
+                                                    data: stats.dailySeries.map(d => d.value),
+                                                    borderColor: '#06b6d4',
+                                                    backgroundColor: 'rgba(6,182,212,0.2)',
+                                                    fill: false,
+                                                    tension: 0.3,
+                                                },
+                                            ],
+                                        }}
+                                        options={{
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: { display: true, labels: { color: '#fff', font: { size: 14, weight: 'bold' } } },
+                                                title: { display: false },
+                                                tooltip: { enabled: true },
+                                            },
+                                            scales: {
+                                                x: {
+                                                    title: { display: true, text: 'Date', color: '#fff', font: { size: 16, weight: 'bold' } },
+                                                    ticks: { color: '#fff', font: { size: 13 } }
+                                                },
+                                                y: {
+                                                    title: { display: true, text: '₹', color: '#fff', font: { size: 16, weight: 'bold' } },
+                                                    ticks: { color: '#fff', font: { size: 13 } },
+                                                    beginAtZero: true
+                                                },
+                                            },
+                                        }}
+                                    />
+                                </div>
                             </Section>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <Section
                                     title="Payment Mode Distribution"
                                     desc="Cash vs UPI split."
+                                    statLabel="Total Revenue"
+                                    statValue={stats.total}
+                                    statPrefix="₹"
                                 >
-                                    <div className="flex items-center justify-around">
-                                        <PieChart data={stats.paymentSeries} />
-                                        <ul className="text-xs space-y-1">
-                                            {stats.paymentSeries.map((p) => (
-                                                <li
-                                                    key={p.label}
-                                                    className="flex items-center gap-2"
-                                                >
-                                                    <span
-                                                        className="inline-block w-2 h-2 rounded-full"
-                                                        style={{
-                                                            background:
-                                                                p.label === 'Cash'
-                                                                    ? '#ec4899'
-                                                                    : '#8b5cf6'
-                                                        }}
-                                                    />
-                                                    {p.label}: ₹
-                                                    {p.value.toLocaleString('en-IN')} (
-                                                    {((p.value / stats.total) * 100).toFixed(0)}%)
-                                                </li>
-                                            ))}
-                                        </ul>
+                                    <div style={{ position: 'relative', width: '100%', height: '300px' }}>
+                                        <Pie
+                                            data={{
+                                                labels: stats.paymentSeries.map(p => p.label),
+                                                datasets: [
+                                                    {
+                                                        data: stats.paymentSeries.map(p => p.value),
+                                                        backgroundColor: ['#ec4899', '#8b5cf6'],
+                                                    },
+                                                ],
+                                            }}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: { position: 'bottom', labels: { color: '#fff', font: { size: 14, weight: 'bold' } } },
+                                                    tooltip: { enabled: true },
+                                                },
+                                            }}
+                                        />
                                     </div>
                                 </Section>
-
                                 <Section
-                                    title="Repeat vs New Customers"
-                                    desc="Customer loyalty insights."
+                                    title="Top Services"
+                                    desc="Most frequent services this period."
+                                    statLabel="Total Customers Served"
+                                    statValue={stats.totalVisits}
                                 >
-                                    <div className="flex items-center justify-around">
-                                        <PieChart data={stats.repeatSplit} />
-                                        <ul className="text-xs space-y-1">
-                                            {stats.repeatSplit.map((p) => (
-                                                <li key={p.label}>
-                                                    {p.label}: {p.value} (
-                                                    {(
-                                                        (p.value /
-                                                            (stats.repeatSplit.reduce(
-                                                                (s, v) => s + v.value,
-                                                                0
-                                                            ) || 1)) *
-                                                        100
-                                                    ).toFixed(0)}
-                                                    %)
-                                                </li>
-                                            ))}
-                                        </ul>
+                                    <div style={{ position: 'relative', width: '100%', height: '300px' }}>
+                                        <Bar
+                                            data={{
+                                                labels: stats.serviceSeries.map(s => s.label),
+                                                datasets: [
+                                                    {
+                                                        label: 'Count',
+                                                        data: stats.serviceSeries.map(s => s.value),
+                                                        backgroundColor: '#8b5cf6',
+                                                    },
+                                                ],
+                                            }}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: { display: false },
+                                                    tooltip: { enabled: true },
+                                                },
+                                                scales: {
+                                                    x: {
+                                                        title: { display: true, text: 'Service', color: '#fff', font: { size: 16, weight: 'bold' } },
+                                                        ticks: { color: '#fff', font: { size: 13 } }
+                                                    },
+                                                    y: {
+                                                        title: { display: true, text: 'Count', color: '#fff', font: { size: 16, weight: 'bold' } },
+                                                        ticks: { color: '#fff', font: { size: 13 } },
+                                                        beginAtZero: true
+                                                    },
+                                                },
+                                            }}
+                                        />
                                     </div>
                                 </Section>
                             </div>
@@ -352,14 +325,23 @@ export default function AnalyticsPage() {
 }
 
 // ---------- Section Wrapper ----------
-function Section({ title, desc, children }) {
+function Section({ title, desc, children, statLabel, statValue, statPrefix }) {
     return (
         <div className="bg-gray-950 border border-gray-800 rounded-xl p-4 shadow-lg">
-            <h2 className="text-sm font-semibold text-gray-300 mb-1 tracking-wide">
-                {title}
-            </h2>
-            {desc && <p className="text-xs text-gray-500 mb-3">{desc}</p>}
-            {children}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                <div>
+                    <h2 className="text-sm font-semibold text-gray-300 tracking-wide">
+                        {title}
+                    </h2>
+                    {desc && <p className="text-xs text-gray-500 mt-1">{desc}</p>}
+                </div>
+                {(statLabel && statValue !== undefined) && (
+                    <div className="text-xs font-bold text-pink-400 text-right whitespace-nowrap">
+                        {statLabel}: <span className="text-white">{statPrefix}{statValue.toLocaleString()}</span>
+                    </div>
+                )}
+            </div>
+            <div className="pt-2">{children}</div>
         </div>
     );
 }
